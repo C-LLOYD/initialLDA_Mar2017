@@ -1,0 +1,4 @@
+dataBackup/
+profiles/Data/rawData/*
+spaceDependence/Data/rawData/*
+timeDependence/Data/rawData/*
