@@ -2,3 +2,4 @@ dataBackup/
 profiles/Data/rawData/*
 spaceDependence/Data/rawData/*
 timeDependence/Data/rawData/*
+timeDependence/Data/processedData/dataFrames/*

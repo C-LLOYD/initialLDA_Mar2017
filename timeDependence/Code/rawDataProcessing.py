@@ -6,7 +6,8 @@
 ####
 ####			txtToDataFrame:	This function reads in the txt files and returns a
 ####					data frame consisting of probe position, sample
-####					number, time stamp and two velocity components.
+####					number, time stamp, residence time, and two
+####					velocity components.
 ####
 ####			rawToProcessed:	Adds additional columns onto the dataFrame such as
 ####					means, RMS velocities and reynolds stresses.
@@ -31,11 +32,12 @@ import pandas as pd
 ####			column 1:	NXYZ	(file number and probe position)
 ####			column 2:	sampleNumber
 ####			column 3:	timeStamp
-####			column 4:	Ux
-####			column 5:	Uy
+####			column 4:	resTime
+####			column 5:	Ux
+####			column 6:	Uy
 ####
 ###########################################################################################
-def txtToDataFrame (fileName):
+def txtToDataFrame (fileName,writePath_dataFrames):
 #	Open the input file and store the line data as 'content'
 	with open(fileName) as f:
 		content=f.readlines()
@@ -70,14 +72,15 @@ def txtToDataFrame (fileName):
 #	txt file arranged as:
 #			column 0:	sampleNumber
 #			column 1:	timeStamp
-#			column 2:	timeInterval (ignore this)
+#			column 2:	resTime
 #			column 3:	Ux
 #			column 4:	Uy
 #
-	sampleNumber,timeStamp,Ux,Uy = [],[],[],[]
+	sampleNumber,timeStamp,resTime,Ux,Uy = [],[],[],[],[]
 	for i in range(index,len(content)):
 		sampleNumber.append(content[i].split('\t')[0])
 		timeStamp.append(content[i].split('\t')[1])
+		resTime.append(content[i].split('\t')[2])
 		Ux.append(content[i].split('\t')[3])
 		Uy.append(content[i].split('\t')[4])
 #
@@ -86,26 +89,33 @@ def txtToDataFrame (fileName):
 	timeStamp=[float(i) for i in timeStamp]
 #	change units to seconds
 	timeStamp = np.divide(timeStamp,1000)
+#	residence time is currently in us, may need converting later
+	resTime=[float(i) for i in resTime]
 	Ux=[float(i) for i in Ux]
 	Uy=[float(i) for i in Uy]
 #
-#	Change data to a dataFrame:
-#	First change each list to a series, then combine the series.
-#	Output the final data frame
+##	Change data to a dataFrame:
+##	First change each list to a series, then combine the series.
+##	Output the final data frame
 	NXYZ = pd.Series(NXYZ)
 	sampleNumber = pd.Series(sampleNumber)
 	timeStamp = pd.Series(timeStamp)
 	Ux = pd.Series(Ux)
 	Uy = pd.Series(Uy)
-	data = pd.DataFrame({'NXYZ':NXYZ,'sampleNumber':sampleNumber,'timeStamp':timeStamp,'Ux':Ux,'Uy':Uy})
+	data = pd.DataFrame({'NXYZ':NXYZ,'sampleNumber':sampleNumber,'timeStamp':timeStamp,'resTime':resTime,'Ux':Ux,'Uy':Uy})
+#
+##	Write data frame as a 'pickle' which can be read in during plotting, if necessary.
+##	File name is determined by probe position	
+	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_data_raw.pkl')
 	return data;
 
 ###########################################################################################
-####	Function Definition:		rawToProcessed				###########
+####	Function Definition:		rawToProcessed_unWeighted		###########
 ####
 ####	This function calculates statistical quantities from the data frame input (as 
 ####	described above). The statistical quantities are added as additional columns to the
-####	original data frame.
+####	original data frame. This function does not include additional weighting terms to 
+####	account for velocity bias.
 ####
 ####	Statistical quantities are calculated for each data entry using the previous values
 ####	i.e this is used to check convergence of stats.
@@ -113,7 +123,7 @@ def txtToDataFrame (fileName):
 ####		Current stats: UxMean, UyMean, uxRMS, uyRMS, uv
 ####
 ###########################################################################################
-def rawToProcessed (data):
+def rawToProcessed_unWeighted (data):
 #
 ##	Read in data frame and convert required variables to lists: This speeds up looping
 ##	process.
@@ -162,8 +172,10 @@ def rawToProcessed (data):
 ###########################################################################################
 
 fileName = "../Data/rawData/8hz/Run9_x400_fl_8hz_300secs/Run9_x400_fl_8_hz_300secs.000001.txt"
-data = txtToDataFrame(fileName)
-data = rawToProcessed(data)
+writePath_dataFrames = "../Data/processedData/dataFrames/"
+writePath_figures = "../Data/processedData/figures/"
+data = txtToDataFrame(fileName,writePath_dataFrames)
+#data_unWeighted = rawToProcessed_unWeighted(data)
 
 
 #	Add some lines at +/- 5%
