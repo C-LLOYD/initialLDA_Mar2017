@@ -1,20 +1,17 @@
 ###########################################################################################
-##############		RAW DATA PROCESSING SCRIPT	###################################
+##############		RAW DATA PROCESSING FUNCTIONS	###################################
 ####
-####		This script processes raw data from the time-dependence tests of Mar2017.
-####		Data is currently processed using two functions:
+####		Data is currently processed using three functions:
 ####
-####			txtToDataFrame:	This function reads in the txt files and returns a
+####	txtToDataFrame:			This function reads in the txt files and returns a
 ####					data frame consisting of probe position, sample
 ####					number, time stamp, residence time, and two
 ####					velocity components.
 ####
-####			rawToProcessed:	Adds additional columns onto the dataFrame such as
+####	rawToProcessed_unweighted:	Adds additional columns onto the dataFrame such as
 ####					means, RMS velocities and reynolds stresses.
 ####
-####		Currently working on the plotting scripts. The modularity of the script
-####		will later allow the addition of filtering operations to the raw time 
-####		series.
+####	plotter:			...
 ####
 ###########################################################################################
 ####
@@ -123,7 +120,7 @@ def txtToDataFrame (fileName,writePath_dataFrames):
 ####		Current stats: UxMean, UyMean, uxRMS, uyRMS, uv
 ####
 ###########################################################################################
-def rawToProcessed_unWeighted (data):
+def rawToProcessed_unweighted (data,writePath_dataFrames):
 #
 ##	Read in data frame and convert required variables to lists: This speeds up looping
 ##	process.
@@ -133,7 +130,7 @@ def rawToProcessed_unWeighted (data):
 ##	Initialise statistics and loop through the length of the time series
 	UxMean,UyMean,uxRMS,uyRMS,uv = [],[],[],[],[]
 	for N in range(len(Ux)):
-		print(N, 'of', len(Ux))
+#		print(N, 'of', len(Ux))
 #
 ##		initialise new values of means and calculate them based on previous N
 ##		append the UxMean values with updated values
@@ -144,9 +141,9 @@ def rawToProcessed_unWeighted (data):
 		UyMean.append(UyMeanNew)
 #
 ##		calculate RMS velocities and Reynolds stresses
-		uxRMS.append(np.divide(sum(np.power(Ux-UxMeanNew,2)),N+1))
-		uyRMS.append(np.divide(sum(np.power(Uy-UyMeanNew,2)),N+1))
-		uv.append(np.divide(sum((Ux-UxMeanNew)*(Uy-UyMeanNew)),N+1))
+		uxRMS.append(np.divide(sum(np.power((Ux[0:N+1]-UxMeanNew),2)),N+1))
+		uyRMS.append(np.divide(sum(np.power((Uy[0:N+1]-UyMeanNew),2)),N+1))
+		uv.append(np.divide(sum((Ux[0:N+1]-UxMeanNew)*(Uy[0:N+1]-UyMeanNew)),N+1))
 #
 ##	Print output of selected stats against global values using numpy library
 ##	If these quantities do not match check the code!
@@ -172,7 +169,7 @@ def rawToProcessed_unWeighted (data):
 	return data;
 
 ###########################################################################################
-####	Function Definition:		dataFrameToPlots			###########
+####	Function Definition:		plotter					###########
 ####
 ####	This function takes a data frame, currently just consisting of raw data, and plots
 ####	the convergence of the calculated statistics. This will later be adapted to plot 
@@ -216,21 +213,21 @@ def bound(ConvergedValue,scalar):
 ##	axis:		Takes either 'FALSE' or [upper,lower]. The upper, lower limits are
 ##			factors of the estimated converged values.
 ##			
-def plotter(writeString, data, VAR, convMethod, axis):
-#	Plot the 
-	mpl.plot(data.timeStamp,VAR,color='k')
+def plotter(writeString,data, time, V, convMethod, axis,xlabel,ylabel):
+#	Plot the variables
+	mpl.plot(time,V,color='k')
 #	Set up convergence criteria
 #	If None is given, provide a converged criteria but don't plot it
 #	Converged is necessary for the axis limits to work
 	if convMethod == None:
-		converged = pd.Series.tolist(VAR)[-1]
+		converged = pd.Series.tolist(V)[-1]
 	else:
 #	If a MEAN converged value is wanted then average over the last 30 seconds of samples
 		if convMethod == 'MEAN':
-			converged = np.mean(VAR.loc[d.timeStamp[:]>270])
+			converged = np.mean(V.loc[time[:]>270])
 		else:
 #	Else we simply take the last value - This is better for steady convergence behaviour
-			converged = pd.Series.tolist(VAR)[-1]
+			converged = pd.Series.tolist(V)[-1]
 #	ONLY PLOT THE BOUNDS IF CONVERGENCE CRITERIA IS GIVEN
 ##	Set up +/-5% bounds:
 		plus5 = bound(converged,0.05)
@@ -239,70 +236,28 @@ def plotter(writeString, data, VAR, convMethod, axis):
 		plus1 = bound(converged,0.01)
 		min1 = bound(converged,-0.01)
 ##	Plot these additional bounds
-		mpl.plot(data.timeStamp,plus5*len(VAR),color='k',linestyle='--')
-		mpl.plot(data.timeStamp,min5*len(VAR),color='k',linestyle='--')
-		mpl.plot(data.timeStamp,plus1*len(VAR),color='k',linestyle='-.')
-		mpl.plot(data.timeStamp,min1*len(VAR),color='k',linestyle='-.')
+		mpl.plot(time,plus5*len(V),color='k',linestyle='--')
+		mpl.plot(time,min5*len(V),color='k',linestyle='--')
+		mpl.plot(time,plus1*len(V),color='k',linestyle='-.')
+		mpl.plot(time,min1*len(V),color='k',linestyle='-.')
 #	Set up axis limits
 	if axis == None:
 		pass
 	else:
 		yUpper = bound(converged,axis[0])
 		yLower = bound(converged,axis[1])
-		mpl.axis([np.min(data.timeStamp),np.max(data.timeStamp),yLower[0],yUpper[0]])
+		mpl.axis([np.min(time),np.max(time),yLower[0],yUpper[0]])
 #
-	mpl.show()
+	mpl.xlabel(xlabel)
+	mpl.ylabel(ylabel)
+	mpl.tight_layout()
+##	Set up write string:
+##	Take position from data file (NXYZ)
+##	Take variable name from ylabel
+	writePath = writeString+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_'+ylabel+'_unweighted.png'
+	mpl.savefig(writePath)
+#	mpl.show()
+	mpl.close()
 	return
 
-
-#plotter('w',d,d.UxMean,'MEAN',[1,-1])
-
-
-##	Read in data:
-#d = pd.read_pickle('../Data/processedData/dataFrames/x_400.0000_z_1.0000_data_unweighted.pkl')
-#writePath_figures = "../Data/processedData/figures/"
-#
 ###########################################################################################
-
-############## 	TYPICAL INPUT FOR NON-LOOPED RUN	########
-#	fileName = "../Data/rawData/8hz/Run9_x400_fl_8hz_300secs/Run9_x400_fl_8_hz_300secs.000001.txt"
-#	Split this:
-#			HighStr = "../Data/rawData/"
-#			midStr = "8hz/Run9_x400_fl_8hz_300secs/"
-#			file = "Run9_x400_fl_8_hz_300secs.000001.txt"
-#
-#	SO we do several loops ...
-#		1st loop: 
-#				
-
-
-fileName = "../Data/rawData/8hz/Run9_x400_fl_8hz_300secs/Run9_x400_fl_8_hz_300secs.000001.txt"
-writePath_dataFrames = "../Data/processedData/dataFrames/"
-writePath_figures = "../Data/processedData/figures/"
-
-#Currently have the data written as a pickle file: Don't need to run the first function
-#data = pd.read_pickle('../Data/processedData/dataFrames/x_400.0000_z_1.0000_data_unweighted.pkl')
-data = txtToDataFrame(fileName,writePath_dataFrames)
-data = rawToProcessed_unWeighted(data)
-#plotter('w',data,data.UxMean,'MEAN',[1,-1])
-
-#	Add some lines at +/- 5%
-#plus5=[np.mean(Ux)*0.05+np.mean(Ux)]*len(Ux)
-#min5 = [np.mean(Ux)*-0.05+np.mean(Ux)]*len(Ux)
-#plus1=[np.mean(Ux)*0.01+np.mean(Ux)]*len(Ux)
-#min1 = [np.mean(Ux)*-0.01+np.mean(Ux)]*len(Ux)
-#mpl.plot(timeStamp,(np.divide(UxMean-np.mean(Ux),np.mean(Ux))))
-#mpl.plot(timeStamp,uxRMS)
-#mpl.plot(timeStamp,plus5)
-#mpl.plot(timeStamp,min5)
-#mpl.plot(timeStamp,plus1)
-#mpl.plot(timeStamp,min1)
-#mpl.xlabel('t')
-#mpl.ylabel('mean(Ux)')
-#mpl.savefig('/usr/not-backed-up/convergence.png')
-#mpl.show()
-
-#######################################################################################
-####	Now run the functions
-
-
