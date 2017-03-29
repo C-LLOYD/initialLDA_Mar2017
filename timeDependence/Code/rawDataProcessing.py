@@ -167,14 +167,217 @@ def rawToProcessed_unWeighted (data):
 	data['uxRMS']= uxRMS
 	data['uyRMS']= uyRMS
 	data['uv']= uv
+####		NEEDS CHANGING : DOESN'T CONTAIN FLOW RATE!
+	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_data_unweighted.pkl')
 	return data;
 
 ###########################################################################################
+####	Function Definition:		dataFrameToPlots			###########
+####
+####	This function takes a data frame, currently just consisting of raw data, and plots
+####	the convergence of the calculated statistics. This will later be adapted to plot 
+####	both filtered data and un-biased velocity data.
+####
+####		Current stats: UxMean, UyMean, uxRMS, uyRMS, uv
+####
+###########################################################################################
+#
+##	Embedded bounds function: This is used to calculate +/- bounds for convergence and
+##	used to limit axis range.
+##
+##	Input: 	convergedValue:	This values is the estimated converged value of the stat
+##				in question. This is either taken as the final value in
+##				the variable vector, or it is averaged over the last 30
+##				seconds of sampling.
+##		
+##		scalar:		This value is the scalar to be multiplied to the converged
+##				value i.e 0.01 will give (conv + 1%(conv)) as an upper 
+##				bound
+##
+def bound(ConvergedValue,scalar):
+	b = [ConvergedValue*scalar + ConvergedValue]
+#	vector = pd.Series.tolist(pandaSeries)
+#	b = [vector[-1]*scalar + vector[-1]]
+	return b
 
-fileName = "../Data/rawData/8hz/Run9_x400_fl_8hz_300secs/Run9_x400_fl_8_hz_300secs.000001.txt"
-writePath_dataFrames = "../Data/processedData/dataFrames/"
+##
+##	Define the plotting function:	This script reads in two variables to be plotted,
+##					a save string for the output png, a convergence
+##					method, and an axis limiter specification.
+##
+##	writeString:	Path of which the png is written. This also contains the first
+##			part of the file name.
+##
+##	d:		Data frame containing probe position and time vector (required 
+##			for plotting and saving)
+##
+##	v:		Variable for plotting (accessed via d.v)
+##	
+##	convMethod:	Takes input either 'MEAN' or 'END'. Conv method is selected based
+##			on this.
+##
+##	axis:		Takes either 'FALSE' or [upper,lower]. The upper, lower limits are
+##			factors of the estimated converged values.
+##			
+def plotter(writeString, data, VAR, convMethod, axis):
+#	Plot the 
+	mpl.plot(data.timeStamp,VAR,color='k')
+#	Set up convergence criteria
+#	If None is given, provide a converged criteria but don't plot it
+#	Converged is necessary for the axis limits to work
+	if convMethod == None:
+		converged = pd.Series.tolist(VAR)[-1]
+	else:
+#	If a MEAN converged value is wanted then average over the last 30 seconds of samples
+		if convMethod == 'MEAN':
+			converged = np.mean(VAR.loc[d.timeStamp[:]>270])
+		else:
+#	Else we simply take the last value - This is better for steady convergence behaviour
+			converged = pd.Series.tolist(VAR)[-1]
+#	ONLY PLOT THE BOUNDS IF CONVERGENCE CRITERIA IS GIVEN
+##	Set up +/-5% bounds:
+		plus5 = bound(converged,0.05)
+		min5 = bound(converged,-0.05)
+##	Set up +/-1% bounds:
+		plus1 = bound(converged,0.01)
+		min1 = bound(converged,-0.01)
+##	Plot these additional bounds
+		mpl.plot(data.timeStamp,plus5*len(VAR),color='k',linestyle='--')
+		mpl.plot(data.timeStamp,min5*len(VAR),color='k',linestyle='--')
+		mpl.plot(data.timeStamp,plus1*len(VAR),color='k',linestyle='-.')
+		mpl.plot(data.timeStamp,min1*len(VAR),color='k',linestyle='-.')
+#	Set up axis limits
+	if axis == None:
+		pass
+	else:
+		yUpper = bound(converged,axis[0])
+		yLower = bound(converged,axis[1])
+		mpl.axis([np.min(data.timeStamp),np.max(data.timeStamp),yLower[0],yUpper[0]])
+#
+	mpl.show()
+	return
+
+
+plotter('w',d,d.UxMean,'MEAN',[1,-1])
+
+
+##	Read in data:
+d = pd.read_pickle('../Data/processedData/dataFrames/x_400.0000_z_1.0000_data_unweighted.pkl')
 writePath_figures = "../Data/processedData/figures/"
-data = txtToDataFrame(fileName,writePath_dataFrames)
+#
+################################
+##	Plot the mean Ux:
+VAR = d.UxMean
+##	Estimate the converged mean value:
+##	Achieve this by averaging over the final 30 seconds of data
+converged = np.mean(VAR.loc[d.timeStamp[:]>270])
+##	Set up +/-5% bounds:
+plus5 = bound(converged,0.05)
+min5 = bound(converged,-0.05)
+##	Set up +/-1% bounds:
+plus1 = bound(converged,0.01)
+min1 = bound(converged,-0.01)
+mpl.plot(d.timeStamp,VAR,color='k')
+mpl.plot(d.timeStamp,plus5*len(VAR),color='k',linestyle='--')
+mpl.plot(d.timeStamp,min5*len(VAR),color='k',linestyle='--')
+mpl.plot(d.timeStamp,plus1*len(VAR),color='k',linestyle='-.')
+mpl.plot(d.timeStamp,min1*len(VAR),color='k',linestyle='-.')
+mpl.show()
+################################
+##	Plot the mean Uy:
+VAR = d.UyMean
+##	Estimate the converged mean value:
+##	Achieve this by averaging over the final 30 seconds of data
+converged = np.mean(VAR.loc[d.timeStamp[:]>270])
+##	Set up +/-5% bounds:
+plus5 = bound(converged,0.05)
+min5 = bound(converged,-0.05)
+##	Set up +/-1% bounds:
+plus1 = bound(converged,0.01)
+min1 = bound(converged,-0.01)
+mpl.plot(d.timeStamp,VAR,color='k')
+mpl.plot(d.timeStamp,plus5*len(VAR),color='k',linestyle='--')
+mpl.plot(d.timeStamp,min5*len(VAR),color='k',linestyle='--')
+mpl.plot(d.timeStamp,plus1*len(VAR),color='k',linestyle='-.')
+mpl.plot(d.timeStamp,min1*len(VAR),color='k',linestyle='-.')
+mpl.show()
+################################
+##	Plot the RMS of Ux:
+VAR = d.uxRMS
+##	Estimate the converged mean value:
+##	Achieve this by averaging over the final 30 seconds of data
+converged = pd.Series.tolist(VAR)[-1]
+##	Set up +/-5% bounds:
+plus5 = bound(converged,0.05)
+min5 = bound(converged,-0.05)
+##	Set up +/-1% bounds:
+plus1 = bound(converged,0.01)
+min1 = bound(converged,-0.01)
+mpl.plot(d.timeStamp,VAR,color='k')
+mpl.plot(d.timeStamp,plus5*len(VAR),color='k',linestyle='--')
+mpl.plot(d.timeStamp,min5*len(VAR),color='k',linestyle='--')
+mpl.plot(d.timeStamp,plus1*len(VAR),color='k',linestyle='-.')
+mpl.plot(d.timeStamp,min1*len(VAR),color='k',linestyle='-.')
+#Axis limiter
+yUpper = bound(converged,10)
+yLower = bound(converged,-0.5)
+mpl.axis([0,300,yLower[0],yUpper[0]])
+mpl.show()
+################################
+##	Plot the RMS of Uy:
+VAR = d.uyRMS
+##	Estimate the converged mean value:
+##	Achieve this by averaging over the final 30 seconds of data
+converged = pd.Series.tolist(VAR)[-1]
+##	Set up +/-5% bounds:
+plus5 = bound(converged,0.05)
+min5 = bound(converged,-0.05)
+##	Set up +/-1% bounds:
+plus1 = bound(converged,0.01)
+min1 = bound(converged,-0.01)
+mpl.plot(d.timeStamp,VAR,color='k')
+mpl.plot(d.timeStamp,plus5*len(VAR),color='k',linestyle='--')
+mpl.plot(d.timeStamp,min5*len(VAR),color='k',linestyle='--')
+mpl.plot(d.timeStamp,plus1*len(VAR),color='k',linestyle='-.')
+mpl.plot(d.timeStamp,min1*len(VAR),color='k',linestyle='-.')
+#Axis limiter
+yUpper = bound(converged,10)
+yLower = bound(converged,-0.5)
+mpl.axis([0,300,yLower[0],yUpper[0]])
+mpl.show()
+################################
+##	Plot the Reynolds stresses, uv:
+VAR = d.uv
+##	Estimate the converged mean value:
+##	Achieve this by averaging over the final 30 seconds of data
+converged = pd.Series.tolist(VAR)[-1]
+##	Set up +/-5% bounds:
+plus5 = bound(converged,0.05)
+min5 = bound(converged,-0.05)
+##	Set up +/-1% bounds:
+plus1 = bound(converged,0.01)
+min1 = bound(converged,-0.01)
+mpl.plot(d.timeStamp,VAR,color='k')
+mpl.plot(d.timeStamp,plus5*len(VAR),color='k',linestyle='--')
+mpl.plot(d.timeStamp,min5*len(VAR),color='k',linestyle='--')
+mpl.plot(d.timeStamp,plus1*len(VAR),color='k',linestyle='-.')
+mpl.plot(d.timeStamp,min1*len(VAR),color='k',linestyle='-.')
+#Axis limiter
+yUpper = bound(converged,10)
+yLower = bound(converged,-0.5)
+mpl.axis([0,300,yLower[0],yUpper[0]])
+mpl.show()
+
+
+###########################################################################################
+
+#fileName = "../Data/rawData/8hz/Run9_x400_fl_8hz_300secs/Run9_x400_fl_8_hz_300secs.000001.txt"
+#writePath_dataFrames = "../Data/processedData/dataFrames/"
+#writePath_figures = "../Data/processedData/figures/"
+
+#Currently have the data written as a pickle file: Don't need to run the first function
+#data = pd.read_pickle('../Data/processedData/dataFrames/x_400.0000_z_1.0000_data_unweighted.pkl')
+#data = txtToDataFrame(fileName,writePath_dataFrames)
 #data_unWeighted = rawToProcessed_unWeighted(data)
 
 
