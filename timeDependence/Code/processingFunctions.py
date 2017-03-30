@@ -142,8 +142,8 @@ def rawToProcessed_unweighted (data,writePath_dataFrames):
 #
 ##	Read in data frame and convert required variables to lists: This speeds up looping
 ##	process.
-	Ux = data.Ux.tolist()
-	Uy = data.Uy.tolist()
+	Ux = data.Ux.as_matrix()
+	Uy = data.Uy.as_matrix()
 #
 ##	Initialise statistics and loop through the length of the time series.
 	UxMean,UyMean,uxRMS,uyRMS,uv = [],[],[],[],[]
@@ -163,13 +163,6 @@ def rawToProcessed_unweighted (data,writePath_dataFrames):
 		uxRMS.append(np.divide(sum(np.power((Ux[0:N+1]-UxMeanNew),2)),N+1))
 		uyRMS.append(np.divide(sum(np.power((Uy[0:N+1]-UyMeanNew),2)),N+1))
 		uv.append(np.divide(sum((Ux[0:N+1]-UxMeanNew)*(Uy[0:N+1]-UyMeanNew)),N+1))
-#
-##	Print output of selected stats against global values using numpy library
-##	If these quantities do not match, check the code!
-	print(np.mean(Ux))
-	print(UxMean[-1])
-	print(np.sqrt(uxRMS[-1]))
-	print(np.std(Ux))
 #
 ##	Add variables to existing data frame.
 ##	Variables first need to be converted to 'pandas.series'
@@ -214,9 +207,9 @@ def rawToProcessed_weighted (data,writePath_dataFrames):
 #
 ##	Read in data frame and convert required variables to lists: This speeds up looping
 ##	process.
-	resT = data.resTime.tolist()
-	Ux = (data.Ux*data.resTime).tolist()
-	Uy = (data.Uy*data.resTime).tolist()
+	resT = data.resTime.as_matrix()
+	Ux = data.Ux.as_matrix()
+	Uy = data.Uy.as_matrix()
 #
 #
 ##	Initialise statistics and loop through the length of the time series.
@@ -228,37 +221,30 @@ def rawToProcessed_weighted (data,writePath_dataFrames):
 ##		initialise new values of means and calculate them based on previous N.
 ##		append the UxMean values with updated values.
 		UxMeanNew, UyMeanNew = [],[]
-		UxMeanNew = np.divide(sum(Ux[0:N+1]),sum(resT[0:N+1]))
+		UxMeanNew = np.divide(sum(Ux[0:N+1]*resT[0:N+1]),sum(resT[0:N+1]))
 		UxMean_w.append(UxMeanNew)
-#		UyMeanNew = np.divide(sum(Uy[0:N+1]),(N+1))
-#		UyMean_w.append(UyMeanNew)
+		UyMeanNew = np.divide(sum(Uy[0:N+1]*resT[0:N+1]),sum(resT[0:N+1]))
+		UyMean_w.append(UyMeanNew)
 #
 ##		calculate RMS velocities and Reynolds stresses.
-#		uxRMS.append(np.divide(sum(np.power((Ux[0:N+1]-UxMeanNew),2)),N+1))
-#		uyRMS.append(np.divide(sum(np.power((Uy[0:N+1]-UyMeanNew),2)),N+1))
-#		uv.append(np.divide(sum((Ux[0:N+1]-UxMeanNew)*(Uy[0:N+1]-UyMeanNew)),N+1))
-#
-##	Print output of selected stats against global values using numpy library
-##	If these quantities do not match, check the code!
-#	print(np.mean(Ux))
-#	print(UxMean[-1])
-#	print(np.sqrt(uxRMS[-1]))
-#	print(np.std(Ux))
+		uxRMS_w.append(np.divide(sum(np.power((Ux[0:N+1]-UxMeanNew),2)*resT[0:N+1]),sum(resT[0:N+1])))
+		uyRMS_w.append(np.divide(sum(np.power((Uy[0:N+1]-UyMeanNew),2)*resT[0:N+1]),sum(resT[0:N+1])))
+		uv_w.append(np.divide(sum((Ux[0:N+1]-UxMeanNew)*(Uy[0:N+1]-UyMeanNew)*resT[0:N+1]),sum(resT[0:N+1])))
 #
 ##	Add variables to existing data frame.
 ##	Variables first need to be converted to 'pandas.series'
 	UxMean_w = pd.Series(UxMean_w)
-#	UyMean = pd.Series(UyMean)
-#	uxRMS = pd.Series(uxRMS)
-#	uyRMS = pd.Series(uyRMS)
-#	uv = pd.Series(uv)
+	UyMean_w = pd.Series(UyMean_w)
+	uxRMS_w = pd.Series(uxRMS_w)
+	uyRMS_w = pd.Series(uyRMS_w)
+	uv_w = pd.Series(uv_w)
 	data['UxMean_w']= UxMean_w
-#	data['UyMean']= UyMean
-#	data['uxRMS']= uxRMS
-#	data['uyRMS']= uyRMS
-#	data['uv']= uv
+	data['UyMean_w']= UyMean_w
+	data['uxRMS_w']= uxRMS_w
+	data['uyRMS_w']= uyRMS_w
+	data['uv_w']= uv_w
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
-#	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_data_unweighted.pkl')
+	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_data_weighted.pkl')
 	return data;
 
 
@@ -303,7 +289,11 @@ def bound(ConvergedValue,scalar):
 ##
 ##	time:		Time variable, taken from data frame. 
 ##
-##	v:		Variable for plotting.
+##	U:		Variable for plotting. Conv. definitions are based on this.
+##
+##	V:		Variable for plotting.
+##
+##	W:		Variable for plotting.
 ##	
 ##	convMethod:	Takes input either 'MEAN' or 'END'. Conv method is selected based
 ##			on this.
@@ -314,23 +304,61 @@ def bound(ConvergedValue,scalar):
 ##	xlabel:		x-axis label as a string.
 ##
 ##	ylabel:		y-label as a string. This is currently also used for the save name.
-##			
-def plotter(writeString,data, time, V, convMethod, axis,xlabel,ylabel):
+##	
+def test(**kargs):
+	time = kargs['time'];	U = kargs['U'];	Ulabel = kargs['Ulabel'];	
+	mpl.plot(time,U,color='r',label=Ulabel)
+#	if V == False:
+#		pass
+#	elif W== False:
+#		mpl.plot(time,V,color='k',label=Vlabel)
+#		mpl.legend(handles=[U,V])
+#	else:
+#		mpl.plot(time,V,color='k',label=Vlabel)
+#		mpl.plot(time,W,color='b',label=Wlabel)
+#		mpl.legend(handles=[U,V,W])
+	mpl.show()
+	return		
+
+		
+def plotter(**kargs):
+	time   	= 	kargs['time'];	
+	U 	 	= 	kargs['U'];		
+	V 		= 	kargs['V'];		
+	W 		= 	kargs['W'];		
+	Ulabel 	= 	kargs['Ulabel'];
+	Vlabel	= 	kargs['Vlabel'];
+	Wlabel 	= 	kargs['Wlabel'];		
+	ylabel 	= 	kargs['ylabel'];			
+	xlabel 	= 	kargs['xlabel'];		
+	axis 		= 	kargs['axis'];
+	writeString = 	kargs['writeString'];
+	convMethod 	= 	kargs['convMethod'];
+	data 		= 	kargs['data'];
 #	Plot the variables
-	mpl.plot(time,V,color='k')
-	mpl.plot(time,data.UxMean_w,color='r')
-#	Set up convergence criteria
-#	If None is given, provide a converged criteria but don't plot it
-#	Converged is necessary for the axis limits to work
+	plot1, = mpl.plot(time,U,color='r',label=Ulabel)
+	if not isinstance(V,pd.Series):
+		pass
+	elif not isinstance(W,pd.Series):
+		plot2, = mpl.plot(time,V,color='k',label=Vlabel)
+		mpl.legend(handles=[plot1, plot2])
+	else:
+		plot2, = mpl.plot(time,V,color='k',label=Vlabel)
+		plot3, = mpl.plot(time,W,color='b',label=Wlabel)
+		mpl.legend(handles=[plot1, plot2, plot3])
+#
+##	Set up convergence criteria
+##	If None is given, provide a converged criteria but don't plot it
+##	Converged is necessary for the axis limits to work
 	if convMethod == None:
-		converged = pd.Series.tolist(V)[-1]
+		converged = pd.Series.tolist(U)[-1]
 	else:
 #	If a MEAN converged value is wanted then average over the last 30 seconds of samples
 		if convMethod == 'MEAN':
-			converged = np.mean(V.loc[time[:]>270])
+			converged = np.mean(U.loc[time[:]>270])
 		else:
 #	Else we simply take the last value - This is better for steady convergence behaviour
-			converged = pd.Series.tolist(V)[-1]
+			converged = pd.Series.tolist(U)[-1]
 #	ONLY PLOT THE BOUNDS IF CONVERGENCE CRITERIA IS GIVEN
 ##	Set up +/-5% bounds:
 		plus5 = bound(converged,0.05)
@@ -339,10 +367,10 @@ def plotter(writeString,data, time, V, convMethod, axis,xlabel,ylabel):
 		plus1 = bound(converged,0.01)
 		min1 = bound(converged,-0.01)
 ##	Plot these additional bounds
-		mpl.plot(time,plus5*len(V),color='k',linestyle='--')
-		mpl.plot(time,min5*len(V),color='k',linestyle='--')
-		mpl.plot(time,plus1*len(V),color='k',linestyle='-.')
-		mpl.plot(time,min1*len(V),color='k',linestyle='-.')
+		mpl.plot(time,plus5*len(U),color='k',linestyle='--')
+		mpl.plot(time,min5*len(U),color='k',linestyle='--')
+		mpl.plot(time,plus1*len(U),color='k',linestyle='-.')
+		mpl.plot(time,min1*len(U),color='k',linestyle='-.')
 #	Set up axis limits
 	if axis == None:
 		pass
@@ -353,6 +381,7 @@ def plotter(writeString,data, time, V, convMethod, axis,xlabel,ylabel):
 #
 	mpl.xlabel(xlabel)
 	mpl.ylabel(ylabel)
+	mpl.legend()
 	mpl.tight_layout()
 ##	Set up write string:
 ##	Take position from data file (NXYZ)

@@ -64,16 +64,51 @@ dataFrames_unweighted = [
 "../Data/processedData/dataFrames/8hz_x_400.0000_z_40.0000_data_unweighted.pkl"
 ]
 
+dataFrames_weighted = [
+"../Data/processedData/dataFrames/4hz_x_400.0000_z_1.0000_data_weighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400.0000_z_15.0000_data_weighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400.0000_z_40.0000_data_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400.0000_z_1.0000_data_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400.0000_z_15.0000_data_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400.0000_z_40.0000_data_weighted.pkl"
+]
+
+from processingFunctions import test
+axis = None
 for i in [0,1,2,3,4,5]:
 	print(fileNames[i])
-	data = pd.read_pickle(dataFrames_unweighted[i])
+	data = pd.read_pickle(dataFrames_weighted[i])
+#	test(time=data.timeStamp,U=data.UxMean_w,Ulabel='Weighted')
 #	data = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
-	data = rawToProcessed_weighted(data,writePaths_dataFrames[i])
-	plotter(writePaths_figures[i],data,data.timeStamp,data.UxMean,'MEAN',[1,-1],'Sampling Time','Mean(Ux)')
-#	plotter(writePaths_figures[i],data,data.timeStamp,data.UyMean,'MEAN',[1,-1],'Sampling Time','Mean(Uy)')
-#	plotter(writePaths_figures[i],data,data.timeStamp,data.uxRMS,'MEAN',[1,-1],'Sampling Time','rms(ux)')
-#	plotter(writePaths_figures[i],data,data.timeStamp,data.uyRMS,'MEAN',[1,-1],'Sampling Time','rms(uy)')
-#	plotter(writePaths_figures[i],data,data.timeStamp,data.uv,'MEAN',[1,-1],'Sampling Time','uv')
+#	data = rawToProcessed_unweighted(data,writePaths_dataFrames[i])
+#	data = rawToProcessed_weighted(data,writePaths_dataFrames[i])
+##	Plotting functions:
+##	Plot mean Ux
+	plotter(writeString=writePaths_figures[i],	data=data,	time=data.timeStamp,
+	U=data.UxMean_w,	V=data.UxMean,	W=[],	convMethod='MEAN',	axis=axis,
+	xlabel='Sampling Time',	ylabel='Mean(Ux)',	Ulabel='Weighted',	Vlabel='Raw',
+	Wlabel=[])
+##	Plot mean Uy
+	plotter(writeString=writePaths_figures[i],	data=data,	time=data.timeStamp,
+	U=data.UyMean_w,	V=data.UyMean,	W=[],	convMethod='MEAN',	axis=axis,
+	xlabel='Sampling Time',	ylabel='Mean(Uy)',	Ulabel='Weighted',	Vlabel='Raw',
+	Wlabel=[])
+##	Plot RMS Ux
+	plotter(writeString=writePaths_figures[i],	data=data,	time=data.timeStamp,
+	U=data.uxRMS_w,	V=data.uxRMS,	W=[],	convMethod='MEAN',	axis=axis,
+	xlabel='Sampling Time',	ylabel='RMS(Ux)',	Ulabel='Weighted',	Vlabel='Raw',
+	Wlabel=[])
+##	Plot RMS Uy
+	plotter(writeString=writePaths_figures[i],	data=data,	time=data.timeStamp,
+	U=data.uyRMS_w,	V=data.uyRMS,	W=[],	convMethod='MEAN',	axis=axis,
+	xlabel='Sampling Time',	ylabel='RMS(Uy)',	Ulabel='Weighted',	Vlabel='Raw',
+	Wlabel=[])
+##	Plot Reynolds Stresses uv
+	plotter(writeString=writePaths_figures[i],	data=data,	time=data.timeStamp,
+	U=data.uv_w,	V=data.uv,	W=[],	convMethod='MEAN',	axis=axis,
+	xlabel='Sampling Time',	ylabel='Reynolds Stresses, (uv)',	Ulabel='Weighted',
+	Vlabel='Raw',	Wlabel=[])
+
 
 
 
