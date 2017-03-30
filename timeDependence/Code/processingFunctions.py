@@ -11,15 +11,20 @@
 ####	rawToProcessed_unweighted:	Adds additional columns onto the dataFrame such as
 ####					means, RMS velocities and reynolds stresses.
 ####
-####	plotter:			...
+####	plotter:			This plots two variables against each other and 
+####					saves the figure to a location specified as an
+####					input. Also gives the option to apply bounds to the
+####					plot, such as +/- % error lines and axis limiters.
+####					These both use a separate, smaller, function called
+####					'bound'.
 ####
 ###########################################################################################
 ####
 ##		Initialise python
-import numpy as np
-import re
-import matplotlib.pyplot as mpl
-import pandas as pd
+import numpy as np			#Numpy for efficient numerics
+import re				#Re for matching text in strings
+import matplotlib.pyplot as mpl		#matplotlib for plotting
+import pandas as pd			#Pandas for dataFrame construction
 #
 ###########################################################################################
 ####		FUNCTION DEFINITON:	txtToDataFrame				###########
@@ -33,6 +38,13 @@ import pandas as pd
 ####			column 5:	Ux
 ####			column 6:	Uy
 ####
+####		Inputs: 	String containing name and location of the LDA txt file, 
+####				and a string containing location of the saved output data 
+####				frame.
+####
+####		Outputs:	dataFrame stored in memory and saved to the input save
+####				path.
+####
 ###########################################################################################
 def txtToDataFrame (fileName,writePath_dataFrames):
 #	Open the input file and store the line data as 'content'
@@ -44,7 +56,7 @@ def txtToDataFrame (fileName,writePath_dataFrames):
 ##
 ##	Identify probe position:
 ##	Achieved by testing to see if the current line, when split by ';'
-##	returns a length of 4. This length corresponds to the correct line.
+##	returns a length of 4.
 #
 	i=0
 	while len(content[i].split(';')) is not 4:	
@@ -62,9 +74,8 @@ def txtToDataFrame (fileName,writePath_dataFrames):
 		if re.match(r'"Row#"',content[i].split('\t')[0]):
 			index=i+1
 			break
-##	Now we have located this start of the data by the index variable
-##	Now loop through the length of content and extract variables
-##	Extract sample number, time stamp and two components of velocity
+##	Now loop through the length of content and extract variables:
+##	sample number, time stamp, residence time, and two components of velocity
 #
 #	txt file arranged as:
 #			column 0:	sampleNumber
@@ -99,7 +110,8 @@ def txtToDataFrame (fileName,writePath_dataFrames):
 	timeStamp = pd.Series(timeStamp)
 	Ux = pd.Series(Ux)
 	Uy = pd.Series(Uy)
-	data = pd.DataFrame({'NXYZ':NXYZ,'sampleNumber':sampleNumber,'timeStamp':timeStamp,'resTime':resTime,'Ux':Ux,'Uy':Uy})
+	data = pd.DataFrame({'NXYZ':NXYZ,'sampleNumber':sampleNumber,
+			'timeStamp':timeStamp,'resTime':resTime,'Ux':Ux,'Uy':Uy})
 #
 ##	Write data frame as a 'pickle' which can be read in during plotting, if necessary.
 ##	File name is determined by probe position	
@@ -107,7 +119,7 @@ def txtToDataFrame (fileName,writePath_dataFrames):
 	return data;
 
 ###########################################################################################
-####	Function Definition:		rawToProcessed_unWeighted		###########
+####	Function Definition:		rawToProcessed_unweighted		###########
 ####
 ####	This function calculates statistical quantities from the data frame input (as 
 ####	described above). The statistical quantities are added as additional columns to the
@@ -116,6 +128,12 @@ def txtToDataFrame (fileName,writePath_dataFrames):
 ####
 ####	Statistical quantities are calculated for each data entry using the previous values
 ####	i.e this is used to check convergence of stats.
+####
+####		Inputs:		dataFrame containing raw data and a write Path for the
+####				output dataFrame.
+####
+####		Output:		dataFrame containing raw data and addition rows for the
+####				statistics below. dataFrame stored in memory and saved.
 ####
 ####		Current stats: UxMean, UyMean, uxRMS, uyRMS, uv
 ####
@@ -127,26 +145,27 @@ def rawToProcessed_unweighted (data,writePath_dataFrames):
 	Ux = data.Ux.tolist()
 	Uy = data.Uy.tolist()
 #
-##	Initialise statistics and loop through the length of the time series
+##	Initialise statistics and loop through the length of the time series.
 	UxMean,UyMean,uxRMS,uyRMS,uv = [],[],[],[],[]
 	for N in range(len(Ux)):
+#		Print the data entry number if monitoring progress.
 #		print(N, 'of', len(Ux))
 #
-##		initialise new values of means and calculate them based on previous N
-##		append the UxMean values with updated values
+##		initialise new values of means and calculate them based on previous N.
+##		append the UxMean values with updated values.
 		UxMeanNew, UyMeanNew = [],[]
 		UxMeanNew = np.divide(sum(Ux[0:N+1]),(N+1))
 		UxMean.append(UxMeanNew)
 		UyMeanNew = np.divide(sum(Uy[0:N+1]),(N+1))
 		UyMean.append(UyMeanNew)
 #
-##		calculate RMS velocities and Reynolds stresses
+##		calculate RMS velocities and Reynolds stresses.
 		uxRMS.append(np.divide(sum(np.power((Ux[0:N+1]-UxMeanNew),2)),N+1))
 		uyRMS.append(np.divide(sum(np.power((Uy[0:N+1]-UyMeanNew),2)),N+1))
 		uv.append(np.divide(sum((Ux[0:N+1]-UxMeanNew)*(Uy[0:N+1]-UyMeanNew)),N+1))
 #
 ##	Print output of selected stats against global values using numpy library
-##	If these quantities do not match check the code!
+##	If these quantities do not match, check the code!
 	print(np.mean(Ux))
 	print(UxMean[-1])
 	print(np.sqrt(uxRMS[-1]))
@@ -164,9 +183,84 @@ def rawToProcessed_unweighted (data,writePath_dataFrames):
 	data['uxRMS']= uxRMS
 	data['uyRMS']= uyRMS
 	data['uv']= uv
-####		NEEDS CHANGING : DOESN'T CONTAIN FLOW RATE!
+####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
 	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_data_unweighted.pkl')
 	return data;
+
+
+###########################################################################################
+####	Function Definition:		rawToProcessed_weighted			###########
+####
+####		This function accounts for velocity bias in the data by 	
+####		using the residence time as a weighting function		
+####
+####	This function calculates statistical quantities from the data frame input (as 
+####	described above). The statistical quantities are added as additional columns to the
+####	original data frame.
+####
+####	Statistical quantities are calculated for each data entry using the previous values
+####	i.e this is used to check convergence of stats.
+####
+####		Inputs:		dataFrame containing raw data and a write Path for the
+####				output dataFrame.
+####
+####		Output:		dataFrame containing raw data and addition rows for the
+####				statistics below. dataFrame stored in memory and saved.
+####
+####		Current stats: UxMean, UyMean, uxRMS, uyRMS, uv
+####
+###########################################################################################
+def rawToProcessed_weighted (data,writePath_dataFrames):
+#
+##	Read in data frame and convert required variables to lists: This speeds up looping
+##	process.
+	resT = data.resTime.tolist()
+	Ux = (data.Ux*data.resTime).tolist()
+	Uy = (data.Uy*data.resTime).tolist()
+#
+#
+##	Initialise statistics and loop through the length of the time series.
+	UxMean_w,UyMean_w,uxRMS_w,uyRMS_w,uv_w = [],[],[],[],[]
+	for N in range(len(Ux)):
+#		Print the data entry number if monitoring progress.
+#		print(N, 'of', len(Ux))
+#
+##		initialise new values of means and calculate them based on previous N.
+##		append the UxMean values with updated values.
+		UxMeanNew, UyMeanNew = [],[]
+		UxMeanNew = np.divide(sum(Ux[0:N+1]),sum(resT[0:N+1]))
+		UxMean_w.append(UxMeanNew)
+#		UyMeanNew = np.divide(sum(Uy[0:N+1]),(N+1))
+#		UyMean_w.append(UyMeanNew)
+#
+##		calculate RMS velocities and Reynolds stresses.
+#		uxRMS.append(np.divide(sum(np.power((Ux[0:N+1]-UxMeanNew),2)),N+1))
+#		uyRMS.append(np.divide(sum(np.power((Uy[0:N+1]-UyMeanNew),2)),N+1))
+#		uv.append(np.divide(sum((Ux[0:N+1]-UxMeanNew)*(Uy[0:N+1]-UyMeanNew)),N+1))
+#
+##	Print output of selected stats against global values using numpy library
+##	If these quantities do not match, check the code!
+#	print(np.mean(Ux))
+#	print(UxMean[-1])
+#	print(np.sqrt(uxRMS[-1]))
+#	print(np.std(Ux))
+#
+##	Add variables to existing data frame.
+##	Variables first need to be converted to 'pandas.series'
+	UxMean_w = pd.Series(UxMean_w)
+#	UyMean = pd.Series(UyMean)
+#	uxRMS = pd.Series(uxRMS)
+#	uyRMS = pd.Series(uyRMS)
+#	uv = pd.Series(uv)
+	data['UxMean_w']= UxMean_w
+#	data['UyMean']= UyMean
+#	data['uxRMS']= uxRMS
+#	data['uyRMS']= uyRMS
+#	data['uv']= uv
+####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
+#	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_data_unweighted.pkl')
+	return data;
+
 
 ###########################################################################################
 ####	Function Definition:		plotter					###########
@@ -185,37 +279,46 @@ def rawToProcessed_unweighted (data,writePath_dataFrames):
 ##	Input: 	convergedValue:	This values is the estimated converged value of the stat
 ##				in question. This is either taken as the final value in
 ##				the variable vector, or it is averaged over the last 30
-##				seconds of sampling.
+##				seconds of sampling (determined by user).
 ##		
 ##		scalar:		This value is the scalar to be multiplied to the converged
 ##				value i.e 0.01 will give (conv + 1%(conv)) as an upper 
-##				bound
+##				bound, -0.01 will give a lower bound. 
 ##
 def bound(ConvergedValue,scalar):
 	b = [ConvergedValue*scalar + ConvergedValue]
 	return b
 
-##
+####
+####	Plotting Function:
+####
 ##	This script reads in two variables to be plotted, a save string for the output
 ##	png, a convergence method, and an axis limiter specification.
 ##
 ##	writeString:	Path of which the png is written. This also contains the first
 ##			part of the file name.
 ##
-##	d:		Data frame containing probe position and time vector (required 
-##			for plotting and saving)
+##	data:		Data frame containing probe position and time vector (required 
+##			for plotting and saving).
 ##
-##	v:		Variable for plotting (accessed via d.v)
+##	time:		Time variable, taken from data frame. 
+##
+##	v:		Variable for plotting.
 ##	
 ##	convMethod:	Takes input either 'MEAN' or 'END'. Conv method is selected based
 ##			on this.
 ##
 ##	axis:		Takes either 'FALSE' or [upper,lower]. The upper, lower limits are
 ##			factors of the estimated converged values.
+##
+##	xlabel:		x-axis label as a string.
+##
+##	ylabel:		y-label as a string. This is currently also used for the save name.
 ##			
 def plotter(writeString,data, time, V, convMethod, axis,xlabel,ylabel):
 #	Plot the variables
 	mpl.plot(time,V,color='k')
+	mpl.plot(time,data.UxMean_w,color='r')
 #	Set up convergence criteria
 #	If None is given, provide a converged criteria but don't plot it
 #	Converged is necessary for the axis limits to work
@@ -255,8 +358,8 @@ def plotter(writeString,data, time, V, convMethod, axis,xlabel,ylabel):
 ##	Take position from data file (NXYZ)
 ##	Take variable name from ylabel
 	writePath = writeString+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_'+ylabel+'_unweighted.png'
-	mpl.savefig(writePath)
-#	mpl.show()
+#	mpl.savefig(writePath)
+	mpl.show()
 	mpl.close()
 	return
 

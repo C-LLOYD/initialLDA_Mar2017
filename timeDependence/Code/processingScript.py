@@ -25,6 +25,7 @@ import matplotlib.pyplot as mpl
 import pandas as pd
 from processingFunctions import txtToDataFrame
 from processingFunctions import rawToProcessed_unweighted
+from processingFunctions import rawToProcessed_weighted
 from processingFunctions import plotter
 ##	Currently does not use loops to define file names, since there are only 6.
 fileNames = [
@@ -67,12 +68,12 @@ for i in [0,1,2,3,4,5]:
 	print(fileNames[i])
 	data = pd.read_pickle(dataFrames_unweighted[i])
 #	data = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
-#	data = rawToProcessed_unweighted(data,writePaths_dataFrames[i])
+	data = rawToProcessed_weighted(data,writePaths_dataFrames[i])
 	plotter(writePaths_figures[i],data,data.timeStamp,data.UxMean,'MEAN',[1,-1],'Sampling Time','Mean(Ux)')
-	plotter(writePaths_figures[i],data,data.timeStamp,data.UyMean,'MEAN',[1,-1],'Sampling Time','Mean(Uy)')
-	plotter(writePaths_figures[i],data,data.timeStamp,data.uxRMS,'MEAN',[1,-1],'Sampling Time','rms(ux)')
-	plotter(writePaths_figures[i],data,data.timeStamp,data.uyRMS,'MEAN',[1,-1],'Sampling Time','rms(uy)')
-	plotter(writePaths_figures[i],data,data.timeStamp,data.uv,'MEAN',[1,-1],'Sampling Time','uv')
+#	plotter(writePaths_figures[i],data,data.timeStamp,data.UyMean,'MEAN',[1,-1],'Sampling Time','Mean(Uy)')
+#	plotter(writePaths_figures[i],data,data.timeStamp,data.uxRMS,'MEAN',[1,-1],'Sampling Time','rms(ux)')
+#	plotter(writePaths_figures[i],data,data.timeStamp,data.uyRMS,'MEAN',[1,-1],'Sampling Time','rms(uy)')
+#	plotter(writePaths_figures[i],data,data.timeStamp,data.uv,'MEAN',[1,-1],'Sampling Time','uv')
 
 
 
