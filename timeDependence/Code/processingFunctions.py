@@ -305,22 +305,6 @@ def bound(ConvergedValue,scalar):
 ##
 ##	ylabel:		y-label as a string. This is currently also used for the save name.
 ##	
-def test(**kargs):
-	time = kargs['time'];	U = kargs['U'];	Ulabel = kargs['Ulabel'];	
-	mpl.plot(time,U,color='r',label=Ulabel)
-#	if V == False:
-#		pass
-#	elif W== False:
-#		mpl.plot(time,V,color='k',label=Vlabel)
-#		mpl.legend(handles=[U,V])
-#	else:
-#		mpl.plot(time,V,color='k',label=Vlabel)
-#		mpl.plot(time,W,color='b',label=Wlabel)
-#		mpl.legend(handles=[U,V,W])
-	mpl.show()
-	return		
-
-		
 def plotter(**kargs):
 	time   	= 	kargs['time'];	
 	U 	 	= 	kargs['U'];		

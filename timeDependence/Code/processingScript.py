@@ -73,7 +73,6 @@ dataFrames_weighted = [
 "../Data/processedData/dataFrames/8hz_x_400.0000_z_40.0000_data_weighted.pkl"
 ]
 
-from processingFunctions import test
 axis = None
 for i in [0,1,2,3,4,5]:
 	print(fileNames[i])
