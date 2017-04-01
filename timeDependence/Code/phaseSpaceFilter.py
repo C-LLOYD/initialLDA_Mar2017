@@ -38,12 +38,20 @@ temp = 1.483*(np.median(np.absolute(d2U-np.median(d2U))))
 lambdad2U = -np.sqrt(2)*erfinv(1-1/(2*len(d2U)))*temp
 #
 ##	Compute rotation angle of the principle axis of d2U vs U using cross correlation
-theta = np.arctan(sum(U*d2U)/sum(U**2))
+alpha = np.arctan(sum(U*d2U)/sum(U**2))
+##	Now compute constants a, b and c for the ellipsoid definition
+b = np.sqrt(np.divide(
+	lambdad2U**2 - (lambdaU**2)*(np.sin(alpha))**2,
+	(np.cos(alpha))**2 - ((np.tan(alpha))**2)*((np.sin(alpha))**2)
+		))
+#
+a = np.sqrt(lambdaU**2 - (b**2)*(np.cos(theta))**2)
+#
+c = lampdadU
 
 
-
-fig= mpl.figure()
-ax = fig.gca(projection='3d')
-ax.scatter(U, dU,d2U, zdir='z')
-mpl.show()
+#fig= mpl.figure()
+#ax = fig.gca(projection='3d')
+#ax.scatter(U, dU,d2U, zdir='z')
+#mpl.show()
 
