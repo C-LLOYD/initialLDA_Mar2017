@@ -3,18 +3,26 @@
 #	Script is used to identify and remove spikes in a given data set by using the method
 #	of Goring and Nikora (2002)
 #
+#
+##	Initialise python
 import numpy as np
 import re
 import matplotlib.pyplot as mpl
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.special import erfinv
-
-#	Import data:
-U = pd.read_pickle('../Data/processedData/dataFrames/8hz_x_400.0000_z_40.0000_data_weighted.pkl')
+##
+#
+data = pd.read_pickle('../Data/processedData/dataFrames/8hz_x_400.0000_z_40.0000_data_weighted.pkl')
 t = U.timeStamp.as_matrix()
-U = U.Ux.as_matrix()
-
+##	Define function
+def PSF(data):
+#
+##	Decompose the important components of the dataframe:
+	Ux = data.Ux.as_matrix()
+	Uy = data.Uy.as_matrix()
+	t = data.timeStamp.as_matrix()
+	U = [Ux,Uy]
 #
 ##	Compute median and offset U
 U = U - np.mean(U)
