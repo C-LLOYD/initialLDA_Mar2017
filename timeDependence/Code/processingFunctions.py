@@ -138,7 +138,7 @@ def txtToDataFrame (fileName,writePath_dataFrames):
 ####		Current stats: UxMean, UyMean, uxRMS, uyRMS, uv
 ####
 ###########################################################################################
-def rawToProcessed_unweighted (data,writePath_dataFrames):
+def rawToProcessed_unweighted (data,writePath_dataFrames,fileAppend):
 #
 ##	Read in data frame and convert required variables to lists: This speeds up looping
 ##	process.
@@ -177,7 +177,7 @@ def rawToProcessed_unweighted (data,writePath_dataFrames):
 	data['uyRMS']= uyRMS
 	data['uv']= uv
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
-	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_data_unweighted.pkl')
+	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+fileAppend)
 	return data;
 
 
@@ -203,7 +203,7 @@ def rawToProcessed_unweighted (data,writePath_dataFrames):
 ####		Current stats: UxMean, UyMean, uxRMS, uyRMS, uv
 ####
 ###########################################################################################
-def rawToProcessed_weighted (data,writePath_dataFrames):
+def rawToProcessed_weighted (data,writePath_dataFrames,fileAppend):
 #
 ##	Read in data frame and convert required variables to lists: This speeds up looping
 ##	process.
@@ -244,7 +244,7 @@ def rawToProcessed_weighted (data,writePath_dataFrames):
 	data['uyRMS_w']= uyRMS_w
 	data['uv_w']= uv_w
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
-	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_data_weighted.pkl')
+	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+fileAppend)
 	return data;
 
 

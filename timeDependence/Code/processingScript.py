@@ -27,6 +27,7 @@ from processingFunctions import txtToDataFrame
 from processingFunctions import rawToProcessed_unweighted
 from processingFunctions import rawToProcessed_weighted
 from processingFunctions import plotter
+from phaseSpaceFilter import phaseSpaceFilter
 ##	Currently does not use loops to define file names, since there are only 6.
 fileNames = [
 "../Data/rawData/4hz/Run8_x400_fl_4hz_300secs/Run8_x400_fl_4_hz_300secs.000001.txt",
@@ -73,14 +74,24 @@ dataFrames_weighted = [
 "../Data/processedData/dataFrames/8hz_x_400.0000_z_40.0000_data_weighted.pkl"
 ]
 
-axis = None
+dataFrames_filtered = [
+"../Data/processedData/dataFrames/4hz_x_400.0000_z_1.0000_data_filtered_weighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400.0000_z_15.0000_data_filtered_weighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400.0000_z_40.0000_data_filtered_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400.0000_z_1.0000_data_filtered_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400.0000_z_15.0000_data_filtered_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400.0000_z_40.0000_data_filtered_weighted.pkl"
+]
+
+axis = [1,-1]
 for i in [0,1,2,3,4,5]:
 	print(fileNames[i])
-	data = pd.read_pickle(dataFrames_weighted[i])
-#	test(time=data.timeStamp,U=data.UxMean_w,Ulabel='Weighted')
+	data = pd.read_pickle(dataFrames_filtered[i])
+	print(data)
 #	data = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
-#	data = rawToProcessed_unweighted(data,writePaths_dataFrames[i])
-#	data = rawToProcessed_weighted(data,writePaths_dataFrames[i])
+#	data = phaseSpaceFilter(data,'mean',writePaths_figures[i],writePaths_dataFrames[i])
+#	data = rawToProcessed_unweighted(data,writePaths_dataFrames[i],'_data_filtered_unweighted.pkl')
+#	data = rawToProcessed_weighted(data,writePaths_dataFrames[i],'_data_filtered_weighted.pkl')
 ##	Plotting functions:
 ##	Plot mean Ux
 	plotter(writeString=writePaths_figures[i],	data=data,	time=data.timeStamp,

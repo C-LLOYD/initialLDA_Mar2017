@@ -1,4 +1,8 @@
-#Currently written as a script but will be made into a function at a later date ..
+##		THIS FUNCTION DOES NOT YET WORK - THE METHOD SEEMS
+##		TO WORK BEST AFTER ONLY A SINGLE ITERATION SO UPDATE
+##		THIS LATER IF NECESSARY
+##
+##Currently written as a script but will be made into a function at a later date ..
 #
 #	Script is used to identify and remove spikes in a given data set by using the method
 #	of Goring and Nikora (2002)
@@ -16,7 +20,7 @@ from scipy.special import erfinv
 ##	Define the filtering function:
 ##	Input: velocity and method
 ##	Output: index of spikes after several loops.
-def spikeLocator(U,data,method,writePaths_figures,VariableName):
+def spikeLocator(U,method,writeString):
 	if 	method == 'mean':
 		U = U - np.mean(U)
 	elif 	method == 'median':
@@ -111,7 +115,7 @@ def spikeLocator(U,data,method,writePaths_figures,VariableName):
 	Z = c*(np.outer(np.sin(phi),np.sin(theta)))
 #
 ##
-	writePath = writePaths_figures+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_'+VariableName+'_phaseSpacePlot.png'
+	writePath = writeString+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_'+VariableName+'_phaseSpacePlot.png'
 #
 ##
 	fig= mpl.figure()
@@ -122,51 +126,88 @@ def spikeLocator(U,data,method,writePaths_figures,VariableName):
 	ax.set_xlabel('U')
 	ax.set_ylabel('dU')
 	ax.set_zlabel('d2U')
-	mpl.savefig(writePath)	
+	mpl.show()	
 	return newSpikes
+
 
 #
 ##	Define function
-def phaseSpaceFilter(data,method,writePaths_figures,writePath_dataFrames):
+def PSF(data,method,writeString):
 #
 ##	Decompose the important components of the dataframe:
 	Ux = data.Ux.as_matrix();
 	Uy = data.Uy.as_matrix();
 	t = data.timeStamp.as_matrix()
-	s = data.sampleNumber.as_matrix()
-	resT = data.resTime.as_matrix()
 #
 ##	Initialise filtered velocity fields
-	XSpikes = spikeLocator(Ux,data,method,writePaths_figures,'Ux')
-	YSpikes = spikeLocator(Uy,data,method,writePaths_figures,'Uy')
-	Spikes = XSpikes + YSpikes
-	N_Spikes = sum(Spikes)
-	print("Number of Ux spikes: "+str(sum(XSpikes)))
-	print("Number of Uy spikes: "+str(sum(YSpikes)))
-	print("Total number of spikes: "+str(N_Spikes)+" = "+
-		str(N_Spikes*float(100)/len(Ux))+"%")
-	Ux = Ux[~Spikes]
-	Uy = Uy[~Spikes]
-	t  = t[~Spikes]
-	resT  = resT[~Spikes]
-	s  = s[~Spikes]
+	UxFil = Ux
+	UyFil = Uy
+	tFil = t
+	Nloops = 1
+	notSpikes = UxFil == UxFil
+	N_newSpikes = 1
+	N_Spikes = 0
+	while N_newSpikes > 0 and Nloops < 2:
+		print("Loop number: " + str(Nloops))
+		newSpikes = spikeLocator(UxFil,method,writeString)
+		N_newSpikes = sum(newSpikes)
+		N_Spikes = N_Spikes + N_newSpikes
+		print("Number of new spikes: "+str(N_newSpikes))
+		print("Total number of spikes: "+str(N_Spikes)+"= "+
+			str(N_Spikes*float(100)/len(Ux))+"%")
+		notSpikes = ~newSpikes
+		UxFil = UxFil[notSpikes]
+		tFil  = tFil[notSpikes]
+		Nloops = Nloops + 1
 #
-##	Add variables to existing data frame.
-##	Variables first need to be converted to 'pandas.series'
-	Ux = pd.Series(Ux)
-	Uy = pd.Series(Uy)
-	t = pd.Series(t)
-	s = pd.Series(s)
-	resT = pd.Series(resT)
+##
+
+	writePath = writeString+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_'+variableName+'_filteredTimeSeries.png'
 #
-	data['Ux']= Ux
-	data['Uy']= Uy
-	data['timeStamp']= t
-	data['sampleNumber']=s
-	data['resTime']=resT
-####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
-	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_data_filtered.pkl')
-	return data;
 ##
-##
-##
+	mpl.subplot(2, 1, 1)
+	mpl.plot(t,Ux)
+	mpl.subplot(2, 1, 2)
+	mpl.plot(tFil,UxFil)
+	mpl.show()
+#
+##	SO:	Function currently works BUT it is harsh when removing 
+##		spikes after the first iteration ...
+##		For now we loop once, just to remove the largest spikes.
+#
+##	Now plot the result ..
+		
+#
+##	Loop through both velocity components
+#
+#
+##	Compute mean/median and offset U
+##	According to Wahl (reference) taking median and MADS results
+##	in more stability but current tests suggest mean is more
+##	appropriate for us.
+
+
+#
+##	Plot the two data sets as time series:
+###	Append the dataframe with the filtered data
+###	Replace the spikes with Nan - this will allow the filtered data to be plotted against the
+##	same time vector.
+#		U_fil = U
+#		index = rhoe>rho_e
+#		U_fil[index] = np.nan
+#		This needs fixing,
+#		then we need to start looping,
+#		Then we need to save the final files ...
+#		!! we will need to update the spikes each loop too, otherwise the original spikes
+#		will not be included!!
+#
+
+data = pd.read_pickle('../Data/processedData/dataFrames/8hz_x_400.0000_z_40.0000_data_weighted.pkl')
+U_raw = data.Ux.as_matrix()
+#spikeLocator(U_raw,'mean')
+
+PSF(data,'median')
+#
+#
+#
+#
