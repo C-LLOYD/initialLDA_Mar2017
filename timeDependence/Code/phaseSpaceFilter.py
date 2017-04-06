@@ -8,6 +8,8 @@
 import numpy as np
 import re
 import matplotlib.pyplot as mpl
+from matplotlib import rcParams
+rcParams.update({'figure.autolayout': True})
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.special import erfinv
@@ -120,13 +122,12 @@ def spikeLocator(U,data,method,writePaths_figures,VariableName):
 	ax.plot_wireframe(X,Y,Z)
 	ax.scatter(U[(rho<rho_e)], dU[(rho<rho_e)],d2U[(rho<rho_e)], zdir='z',color='k')
 	ax.scatter(U[(rho>rho_e)], dU[(rho>rho_e)],d2U[(rho>rho_e)], zdir='z',color='r')
-	ax.set_xlabel(r'$U$',fontsize=20)
+	ax.set_xlabel(r'$\mathbf{U}$ (m/s)',fontsize=20)
 	ax.xaxis.labelpad=15
-	ax.set_ylabel(r'$dU$',fontsize=20)
+	ax.set_ylabel(r'$\mathbf{d U}$ (m/s)',fontsize=20)
 	ax.yaxis.labelpad=15
-	ax.set_zlabel(r'$d^2 U$',fontsize=20)
+	ax.set_zlabel(r'$\mathbf{d^2 U}$ (m/s)',fontsize=20)
 	ax.zaxis.labelpad=15
-	mpl.tight_layout()
 ##	We could save the plot but currently this saves on every loop: Not useful!
 ##	Have it save on only the first loop or not at all.
 	mpl.savefig(writePath)

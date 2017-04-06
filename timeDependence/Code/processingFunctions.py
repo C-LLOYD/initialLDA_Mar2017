@@ -24,6 +24,8 @@
 import numpy as np			#Numpy for efficient numerics
 import re				#Re for matching text in strings
 import matplotlib.pyplot as mpl		#matplotlib for plotting
+from matplotlib import rcParams
+rcParams.update({'figure.autolayout': True})
 import pandas as pd			#Pandas for dataFrame construction
 #
 ###########################################################################################
@@ -325,24 +327,34 @@ def plotter(**kargs):
 	convMethod 	= 	kargs['convMethod'];
 	data 		= 	kargs['data'];
 	writeName	=	kargs['writeName'];
+	legend	=	kargs['legend'];
 #	Plot the variables
 	mpl.rc('text', usetex=True)
 #	mpl.rc('font', family='serif')
-	plot1, = mpl.plot(time1,U1,color='k',linestyle='-.',linewidth='2',label=U1label)
+	plot1, = mpl.plot(time1,U1,color='k',linestyle='-.',linewidth='3',label=U1label)
 	if not isinstance(U2,pd.Series):
 		pass
 	elif not isinstance(U3,pd.Series):
-		plot2, = mpl.plot(time2,U2,color='k',linestyle='-',linewidth='1.5',label=U2label)
-		mpl.legend(handles=[plot1, plot2])
+		plot2, = mpl.plot(time2,U2,color='k',linestyle='-',linewidth='2',label=U2label)
+		if legend == None:
+			pass
+		else:
+			mpl.legend(handles=[plot1, plot2])
 	elif not isinstance(U4,pd.Series):
-		plot2, = mpl.plot(time2,U2,color='k',linestyle='-',linewidth='1.5',label=U2label)
-		plot3, = mpl.plot(time3,U3,color='r',linestyle='-.',linewidth='2',label=U3label)
-		mpl.legend(handles=[plot1, plot2, plot3])
+		plot2, = mpl.plot(time2,U2,color='k',linestyle='-',linewidth='2',label=U2label)
+		plot3, = mpl.plot(time3,U3,color='r',linestyle='-.',linewidth='3',label=U3label)
+		if legend == None:
+			pass
+		else:
+			mpl.legend(handles=[plot1, plot2, plot3])
 	else:
-		plot2, = mpl.plot(time2,U2,color='k',linestyle='-',linewidth='1.5',label=U2label)
-		plot3, = mpl.plot(time3,U3,color='r',linestyle='-.',linewidth='2',label=U3label)
-		plot4, = mpl.plot(time4,U4,color='r',linestyle='-',linewidth='1.5',label=U4label)
-		mpl.legend(handles=[plot1, plot2, plot3, plot4])
+		plot2, = mpl.plot(time2,U2,color='k',linestyle='-',linewidth='2',label=U2label)
+		plot3, = mpl.plot(time3,U3,color='r',linestyle='-.',linewidth='3',label=U3label)
+		plot4, = mpl.plot(time4,U4,color='r',linestyle='-',linewidth='2',label=U4label)
+		if legend == None:
+			pass
+		else:
+			mpl.legend(handles=[plot1, plot2, plot3, plot4])
 #
 ##	Set up convergence criteria
 ##	If None is given, provide a converged criteria but don't plot it
@@ -364,10 +376,10 @@ def plotter(**kargs):
 		plus1 = bound(converged,0.01)
 		min1 = bound(converged,-0.01)
 ##	Plot these additional bounds
-		mpl.plot(time4,plus5*len(U4),color='k',linestyle=':')
-		mpl.plot(time4,min5*len(U4),color='k',linestyle=':')
-		mpl.plot(time4,plus1*len(U4),color='k',linestyle='-.')
-		mpl.plot(time4,min1*len(U4),color='k',linestyle='-.')
+		mpl.plot(time4,plus5*len(U4),color='k',linestyle=':',linewidth='1.5')
+		mpl.plot(time4,min5*len(U4),color='k',linestyle=':',linewidth='1.5')
+		mpl.plot(time4,plus1*len(U4),color='k',linestyle='-.',linewidth='1.5')
+		mpl.plot(time4,min1*len(U4),color='k',linestyle='-.',linewidth='1.5')
 #	Set up axis limits
 	if axis == None:
 		pass
@@ -376,10 +388,17 @@ def plotter(**kargs):
 		yLower = bound(converged,axis[1])
 		mpl.axis([np.min(time4),np.max(time4),yLower[0],yUpper[0]])
 #
-	mpl.xlabel(xlabel,fontsize=20)
-	mpl.ylabel(ylabel,fontsize=20)
-	mpl.legend()
-	mpl.tight_layout()
+	mpl.rc('font', family='serif')
+	mpl.xlabel(xlabel,fontsize=30)
+	mpl.ylabel(ylabel,fontsize=30)
+	if legend == None:
+		pass
+	else:
+		mpl.legend(fontsize=20)
+#
+#	mpl.tight_layout()
+	mpl.xticks(fontsize=25)
+	mpl.yticks(fontsize=25)
 ##	Set up write string:
 ##	Take position from data file (NXYZ)
 ##	Take variable name from writeNamestr(int(float(d.NXYZ[1])))
