@@ -115,7 +115,7 @@ def txtToDataFrame (fileName,writePath_dataFrames):
 #
 ##	Write data frame as a 'pickle' which can be read in during plotting, if necessary.
 ##	File name is determined by probe position	
-	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_data_raw.pkl')
+	data.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+'_data_raw.pkl')
 	return data;
 
 ###########################################################################################
@@ -177,7 +177,7 @@ def rawToProcessed_unweighted (data,writePath_dataFrames,fileAppend):
 	data['uyRMS']= uyRMS
 	data['uv']= uv
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
-	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+fileAppend)
+	data.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+fileAppend)
 	return data;
 
 
@@ -244,7 +244,7 @@ def rawToProcessed_weighted (data,writePath_dataFrames,fileAppend):
 	data['uyRMS_w']= uyRMS_w
 	data['uv_w']= uv_w
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
-	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+fileAppend)
+	data.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+fileAppend)
 	return data;
 
 
@@ -306,43 +306,56 @@ def bound(ConvergedValue,scalar):
 ##	ylabel:		y-label as a string. This is currently also used for the save name.
 ##	
 def plotter(**kargs):
-	time   	= 	kargs['time'];	
-	U 	 	= 	kargs['U'];		
-	V 		= 	kargs['V'];		
-	W 		= 	kargs['W'];		
-	Ulabel 	= 	kargs['Ulabel'];
-	Vlabel	= 	kargs['Vlabel'];
-	Wlabel 	= 	kargs['Wlabel'];		
+	time1   	= 	kargs['time1'];
+	time2  	= 	kargs['time2'];
+	time3   	= 	kargs['time3'];
+	time4  	= 	kargs['time4'];	
+	U1	 	= 	kargs['U1'];		
+	U2 		= 	kargs['U2'];		
+	U3 		= 	kargs['U3'];
+	U4		= 	kargs['U4'];		
+	U1label 	= 	kargs['U1label'];
+	U2label	= 	kargs['U2label'];
+	U3label 	= 	kargs['U3label'];		
+	U4label 	= 	kargs['U4label'];
 	ylabel 	= 	kargs['ylabel'];			
 	xlabel 	= 	kargs['xlabel'];		
 	axis 		= 	kargs['axis'];
 	writeString = 	kargs['writeString'];
 	convMethod 	= 	kargs['convMethod'];
 	data 		= 	kargs['data'];
+	writeName	=	kargs['writeName'];
 #	Plot the variables
-	plot1, = mpl.plot(time,U,color='r',label=Ulabel)
-	if not isinstance(V,pd.Series):
+	mpl.rc('text', usetex=True)
+#	mpl.rc('font', family='serif')
+	plot1, = mpl.plot(time1,U1,color='k',linestyle='-.',linewidth='2',label=U1label)
+	if not isinstance(U2,pd.Series):
 		pass
-	elif not isinstance(W,pd.Series):
-		plot2, = mpl.plot(time,V,color='k',label=Vlabel)
+	elif not isinstance(U3,pd.Series):
+		plot2, = mpl.plot(time2,U2,color='k',linestyle='-',linewidth='1.5',label=U2label)
 		mpl.legend(handles=[plot1, plot2])
-	else:
-		plot2, = mpl.plot(time,V,color='k',label=Vlabel)
-		plot3, = mpl.plot(time,W,color='b',label=Wlabel)
+	elif not isinstance(U4,pd.Series):
+		plot2, = mpl.plot(time2,U2,color='k',linestyle='-',linewidth='1.5',label=U2label)
+		plot3, = mpl.plot(time3,U3,color='r',linestyle='-.',linewidth='2',label=U3label)
 		mpl.legend(handles=[plot1, plot2, plot3])
+	else:
+		plot2, = mpl.plot(time2,U2,color='k',linestyle='-',linewidth='1.5',label=U2label)
+		plot3, = mpl.plot(time3,U3,color='r',linestyle='-.',linewidth='2',label=U3label)
+		plot4, = mpl.plot(time4,U4,color='r',linestyle='-',linewidth='1.5',label=U4label)
+		mpl.legend(handles=[plot1, plot2, plot3, plot4])
 #
 ##	Set up convergence criteria
 ##	If None is given, provide a converged criteria but don't plot it
 ##	Converged is necessary for the axis limits to work
 	if convMethod == None:
-		converged = pd.Series.tolist(U)[-1]
+		converged = pd.Series.tolist(U4)[-1]
 	else:
 #	If a MEAN converged value is wanted then average over the last 30 seconds of samples
 		if convMethod == 'MEAN':
-			converged = np.mean(U.loc[time[:]>270])
+			converged = np.mean(U4.loc[time4[:]>270])
 		else:
 #	Else we simply take the last value - This is better for steady convergence behaviour
-			converged = pd.Series.tolist(U)[-1]
+			converged = pd.Series.tolist(U4)[-1]
 #	ONLY PLOT THE BOUNDS IF CONVERGENCE CRITERIA IS GIVEN
 ##	Set up +/-5% bounds:
 		plus5 = bound(converged,0.05)
@@ -351,28 +364,29 @@ def plotter(**kargs):
 		plus1 = bound(converged,0.01)
 		min1 = bound(converged,-0.01)
 ##	Plot these additional bounds
-		mpl.plot(time,plus5*len(U),color='k',linestyle='--')
-		mpl.plot(time,min5*len(U),color='k',linestyle='--')
-		mpl.plot(time,plus1*len(U),color='k',linestyle='-.')
-		mpl.plot(time,min1*len(U),color='k',linestyle='-.')
+		mpl.plot(time4,plus5*len(U4),color='k',linestyle=':')
+		mpl.plot(time4,min5*len(U4),color='k',linestyle=':')
+		mpl.plot(time4,plus1*len(U4),color='k',linestyle='-.')
+		mpl.plot(time4,min1*len(U4),color='k',linestyle='-.')
 #	Set up axis limits
 	if axis == None:
 		pass
 	else:
 		yUpper = bound(converged,axis[0])
 		yLower = bound(converged,axis[1])
-		mpl.axis([np.min(time),np.max(time),yLower[0],yUpper[0]])
+		mpl.axis([np.min(time4),np.max(time4),yLower[0],yUpper[0]])
 #
-	mpl.xlabel(xlabel)
-	mpl.ylabel(ylabel)
+	mpl.xlabel(xlabel,fontsize=20)
+	mpl.ylabel(ylabel,fontsize=20)
 	mpl.legend()
 	mpl.tight_layout()
 ##	Set up write string:
 ##	Take position from data file (NXYZ)
-##	Take variable name from ylabel
-	writePath = writeString+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_'+ylabel+'_unweighted.png'
-#	mpl.savefig(writePath)
-	mpl.show()
+##	Take variable name from writeNamestr(int(float(d.NXYZ[1])))
+	writePath = writeString+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+'_'+writeName
+	print(writePath)
+	mpl.savefig(writePath)
+#	mpl.show()
 	mpl.close()
 	return
 

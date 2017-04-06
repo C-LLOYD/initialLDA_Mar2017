@@ -111,18 +111,28 @@ def spikeLocator(U,data,method,writePaths_figures,VariableName):
 	Z = c*(np.outer(np.sin(phi),np.sin(theta)))
 #
 ##
-	writePath = writePaths_figures+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_'+VariableName+'_phaseSpacePlot.png'
+	writePath = writePaths_figures+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+'_'+VariableName+'_phaseSpacePlot.png'
 #
 ##
 	fig= mpl.figure()
+	mpl.rc('text', usetex=True)
 	ax = fig.gca(projection='3d')
 	ax.plot_wireframe(X,Y,Z)
 	ax.scatter(U[(rho<rho_e)], dU[(rho<rho_e)],d2U[(rho<rho_e)], zdir='z',color='k')
 	ax.scatter(U[(rho>rho_e)], dU[(rho>rho_e)],d2U[(rho>rho_e)], zdir='z',color='r')
-	ax.set_xlabel('U')
-	ax.set_ylabel('dU')
-	ax.set_zlabel('d2U')
-	mpl.savefig(writePath)	
+	ax.set_xlabel(r'$U$',fontsize=20)
+	ax.xaxis.labelpad=15
+	ax.set_ylabel(r'$dU$',fontsize=20)
+	ax.yaxis.labelpad=15
+	ax.set_zlabel(r'$d^2 U$',fontsize=20)
+	ax.zaxis.labelpad=15
+	mpl.tight_layout()
+##	We could save the plot but currently this saves on every loop: Not useful!
+##	Have it save on only the first loop or not at all.
+	mpl.savefig(writePath)
+#	mpl.show()
+	mpl.close()
+#
 	return newSpikes
 
 #
@@ -130,8 +140,8 @@ def spikeLocator(U,data,method,writePaths_figures,VariableName):
 def phaseSpaceFilter(data,method,writePaths_figures,writePath_dataFrames):
 #
 ##	Decompose the important components of the dataframe:
-	Ux = data.Ux.as_matrix();
-	Uy = data.Uy.as_matrix();
+	Ux = data.Ux.as_matrix()
+	Uy = data.Uy.as_matrix()
 	t = data.timeStamp.as_matrix()
 	s = data.sampleNumber.as_matrix()
 	resT = data.resTime.as_matrix()
@@ -165,7 +175,7 @@ def phaseSpaceFilter(data,method,writePaths_figures,writePath_dataFrames):
 	data['sampleNumber']=s
 	data['resTime']=resT
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
-	data.to_pickle(writePath_dataFrames+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_data_filtered.pkl')
+#	data.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+'_data_filtered.pkl')
 	return data;
 ##
 ##

@@ -57,67 +57,112 @@ writePaths_figures = [
 ]
 ##
 dataFrames_unweighted = [
-"../Data/processedData/dataFrames/4hz_x_400.0000_z_1.0000_data_unweighted.pkl",
-"../Data/processedData/dataFrames/4hz_x_400.0000_z_15.0000_data_unweighted.pkl",
-"../Data/processedData/dataFrames/4hz_x_400.0000_z_40.0000_data_unweighted.pkl",
-"../Data/processedData/dataFrames/8hz_x_400.0000_z_1.0000_data_unweighted.pkl",
-"../Data/processedData/dataFrames/8hz_x_400.0000_z_15.0000_data_unweighted.pkl",
-"../Data/processedData/dataFrames/8hz_x_400.0000_z_40.0000_data_unweighted.pkl"
+"../Data/processedData/dataFrames/4hz_x_400_z_1_data_unweighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400_z_15_data_unweighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400_z_40_data_unweighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_1_data_unweighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_15_data_unweighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_40_data_unweighted.pkl"
 ]
 
 dataFrames_weighted = [
-"../Data/processedData/dataFrames/4hz_x_400.0000_z_1.0000_data_weighted.pkl",
-"../Data/processedData/dataFrames/4hz_x_400.0000_z_15.0000_data_weighted.pkl",
-"../Data/processedData/dataFrames/4hz_x_400.0000_z_40.0000_data_weighted.pkl",
-"../Data/processedData/dataFrames/8hz_x_400.0000_z_1.0000_data_weighted.pkl",
-"../Data/processedData/dataFrames/8hz_x_400.0000_z_15.0000_data_weighted.pkl",
-"../Data/processedData/dataFrames/8hz_x_400.0000_z_40.0000_data_weighted.pkl"
+"../Data/processedData/dataFrames/4hz_x_400_z_1_data_weighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400_z_15_data_weighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400_z_40_data_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_1_data_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_15_data_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_40_data_weighted.pkl"
 ]
 
 dataFrames_filtered = [
-"../Data/processedData/dataFrames/4hz_x_400.0000_z_1.0000_data_filtered_weighted.pkl",
-"../Data/processedData/dataFrames/4hz_x_400.0000_z_15.0000_data_filtered_weighted.pkl",
-"../Data/processedData/dataFrames/4hz_x_400.0000_z_40.0000_data_filtered_weighted.pkl",
-"../Data/processedData/dataFrames/8hz_x_400.0000_z_1.0000_data_filtered_weighted.pkl",
-"../Data/processedData/dataFrames/8hz_x_400.0000_z_15.0000_data_filtered_weighted.pkl",
-"../Data/processedData/dataFrames/8hz_x_400.0000_z_40.0000_data_filtered_weighted.pkl"
+"../Data/processedData/dataFrames/4hz_x_400_z_1_data_filtered_weighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400_z_15_data_filtered_weighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400_z_40_data_filtered_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_1_data_filtered_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_15_data_filtered_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_40_data_filtered_weighted.pkl"
 ]
 
-axis = [1,-1]
-for i in [0,1,2,3,4,5]:
-	print(fileNames[i])
-	data = pd.read_pickle(dataFrames_filtered[i])
-	print(data)
-#	data = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
-#	data = phaseSpaceFilter(data,'mean',writePaths_figures[i],writePaths_dataFrames[i])
-#	data = rawToProcessed_unweighted(data,writePaths_dataFrames[i],'_data_filtered_unweighted.pkl')
-#	data = rawToProcessed_weighted(data,writePaths_dataFrames[i],'_data_filtered_weighted.pkl')
+def autocorr(x):
+    result = np.correlate(x, x, mode='full')
+    return result[result.size/2:]
+
+data = pd.read_pickle(dataFrames_filtered[0])
+U = data.Uy.as_matrix()
+t = data.timeStamp.as_matrix()
+U = U[~np.isnan(U)]
+t = t[~np.isnan(t)]
+
+#iact.append(sum(autocorr_f[autocorr_f.size/2:]/autocorr_f[autocorr_f.size/2]))
+#
+u = U-np.mean(U)
+#
+timeseries = (U)
+mean = np.mean(timeseries)
+timeseries -= np.mean(timeseries)
+rho = np.correlate(timeseries, timeseries, mode='full')
+rho = rho[rho.size/2:]/rho[rho.size/2]
+timeScale = np.trapz(rho,x=t)
+print(timeScale)
+#rho = autocorr(u)/np.var(u)
+
+print(rho,t)
+mpl.plot(t,rho)
+mpl.axis([0,20,0,1])
+mpl.show()
+#axis = [-0.8,0.8]
+#for i in [0,1,2,3,4,5]:
+#	print(fileNames[i])
+#	data_raw = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
+#	data_unwei = rawToProcessed_unweighted(data_raw,writePaths_dataFrames[i],'_data_unweighted.pkl')
+#	data_wei = rawToProcessed_weighted(data_unwei,writePaths_dataFrames[i],'_data_weighted.pkl')
+#	data_fil = phaseSpaceFilter(data_raw,'mean',writePaths_figures[i],writePaths_dataFrames[i])
+#	data_fil_unwei = rawToProcessed_unweighted(data_fil,writePaths_dataFrames[i],'_data_filtered_unweighted.pkl')
+#	data_fil_wei = rawToProcessed_weighted(data_fil_unwei,writePaths_dataFrames[i],'_data_filtered_weighted.pkl')
+#	data1 = pd.read_pickle(dataFrames_weighted[i])
+#	data = pd.read_pickle(dataFrames_filtered[i])
+#
 ##	Plotting functions:
+#
 ##	Plot mean Ux
-	plotter(writeString=writePaths_figures[i],	data=data,	time=data.timeStamp,
-	U=data.UxMean_w,	V=data.UxMean,	W=[],	convMethod='MEAN',	axis=axis,
-	xlabel='Sampling Time',	ylabel='Mean(Ux)',	Ulabel='Weighted',	Vlabel='Raw',
-	Wlabel=[])
+#	plotter(writeString=writePaths_figures[i],	data=data1,	time1=data1.timeStamp,	
+#	time2=data1.timeStamp,	time3=data2.timeStamp,	time4=data2.timeStamp,
+#	U1=data1.UxMean,	U2=data1.UxMean_w,	U3=data2.UxMean,	U4=data2.UxMean_w,
+#	convMethod='MEAN',	axis=axis,	xlabel=r'$t$',	ylabel=r'$<U_x>$',
+#	U1label='Raw',	U2label='Raw, Weighted',	U3label='Filtered', U4label='Filtered, Weighted',
+#	writeName='MeanUx.png')
+#
 ##	Plot mean Uy
-	plotter(writeString=writePaths_figures[i],	data=data,	time=data.timeStamp,
-	U=data.UyMean_w,	V=data.UyMean,	W=[],	convMethod='MEAN',	axis=axis,
-	xlabel='Sampling Time',	ylabel='Mean(Uy)',	Ulabel='Weighted',	Vlabel='Raw',
-	Wlabel=[])
+#	plotter(writeString=writePaths_figures[i],	data=data1,	time1=data1.timeStamp,	
+#	time2=data1.timeStamp,	time3=data2.timeStamp,	time4=data2.timeStamp,
+#	U1=data1.UyMean,	U2=data1.UyMean_w,	U3=data2.UyMean,	U4=data2.UyMean_w,
+#	convMethod='MEAN',	axis=axis,	xlabel=r'$t$',	ylabel=r'$<U_y>$',
+#	U1label='Raw',	U2label='Raw, Weighted',	U3label='Filtered', U4label='Filtered, Weighted',
+#	writeName='MeanUy.png')
+#
 ##	Plot RMS Ux
-	plotter(writeString=writePaths_figures[i],	data=data,	time=data.timeStamp,
-	U=data.uxRMS_w,	V=data.uxRMS,	W=[],	convMethod='MEAN',	axis=axis,
-	xlabel='Sampling Time',	ylabel='RMS(Ux)',	Ulabel='Weighted',	Vlabel='Raw',
-	Wlabel=[])
+#	plotter(writeString=writePaths_figures[i],	data=data1,	time1=data1.timeStamp,	
+#	time2=data1.timeStamp,	time3=data2.timeStamp,	time4=data2.timeStamp,
+#	U1=data1.uxRMS,	U2=data1.uxRMS_w,	U3=data2.uxRMS,	U4=data2.uxRMS_w,
+#	convMethod='MEAN',	axis=axis,	xlabel=r'$t$',	ylabel=r'RMS($u_x$)',
+#	U1label='Raw',	U2label='Raw, Weighted',	U3label='Filtered', U4label='Filtered, Weighted',
+#	writeName='RMSux.png')
+#
 ##	Plot RMS Uy
-	plotter(writeString=writePaths_figures[i],	data=data,	time=data.timeStamp,
-	U=data.uyRMS_w,	V=data.uyRMS,	W=[],	convMethod='MEAN',	axis=axis,
-	xlabel='Sampling Time',	ylabel='RMS(Uy)',	Ulabel='Weighted',	Vlabel='Raw',
-	Wlabel=[])
+#	plotter(writeString=writePaths_figures[i],	data=data1,	time1=data1.timeStamp,	
+#	time2=data1.timeStamp,	time3=data2.timeStamp,	time4=data2.timeStamp,
+#	U1=data1.uyRMS,	U2=data1.uyRMS_w,	U3=data2.uyRMS,	U4=data2.uyRMS_w,
+#	convMethod='MEAN',	axis=axis,	xlabel=r'$t$',	ylabel=r'RMS($u_y$)',
+#	U1label='Raw',	U2label='Raw, Weighted',	U3label='Filtered', U4label='Filtered, Weighted',
+#	writeName='RMSuy.png')
+#
 ##	Plot Reynolds Stresses uv
-	plotter(writeString=writePaths_figures[i],	data=data,	time=data.timeStamp,
-	U=data.uv_w,	V=data.uv,	W=[],	convMethod='MEAN',	axis=axis,
-	xlabel='Sampling Time',	ylabel='Reynolds Stresses, (uv)',	Ulabel='Weighted',
-	Vlabel='Raw',	Wlabel=[])
+#	plotter(writeString=writePaths_figures[i],	data=data1,	time1=data1.timeStamp,	
+#	time2=data1.timeStamp,	time3=data2.timeStamp,	time4=data2.timeStamp,
+#	U1=data1.uv,	U2=data1.uv_w,	U3=data2.uv,	U4=data2.uv_w,
+#	convMethod='MEAN',	axis=axis,	xlabel=r'$t$',	ylabel=r'$u_x u_y$',
+#	U1label='Raw',	U2label='Raw, Weighted',	U3label='Filtered', U4label='Filtered, Weighted',
+#	writeName='uv.png')
 
 
 

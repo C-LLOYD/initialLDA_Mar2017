@@ -126,7 +126,9 @@ def spikeLocator(U,method,writeString):
 	ax.set_xlabel('U')
 	ax.set_ylabel('dU')
 	ax.set_zlabel('d2U')
-	mpl.show()	
+	mpl.show()
+#	Currently displays the phase space plot but doesn't save it
+	mpl.close()
 	return newSpikes
 
 
@@ -135,9 +137,11 @@ def spikeLocator(U,method,writeString):
 def PSF(data,method,writeString):
 #
 ##	Decompose the important components of the dataframe:
-	Ux = data.Ux.as_matrix();
-	Uy = data.Uy.as_matrix();
+	Ux = data.Ux.as_matrix()
+	Uy = data.Uy.as_matrix()
 	t = data.timeStamp.as_matrix()
+	s = data.sampleNumber.as_matrix()
+	resT = data.resTime.as_matrix()
 #
 ##	Initialise filtered velocity fields
 	UxFil = Ux
@@ -162,14 +166,14 @@ def PSF(data,method,writeString):
 #
 ##
 
-	writePath = writeString+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_'+variableName+'_filteredTimeSeries.png'
+#	writePath = writeString+'x_'+data.NXYZ[1]+'_z_'+data.NXYZ[3]+'_'+variableName+'_filteredTimeSeries.png'
 #
 ##
-	mpl.subplot(2, 1, 1)
-	mpl.plot(t,Ux)
-	mpl.subplot(2, 1, 2)
-	mpl.plot(tFil,UxFil)
-	mpl.show()
+#	mpl.subplot(2, 1, 1)
+#	mpl.plot(t,Ux)
+#	mpl.subplot(2, 1, 2)
+#	mpl.plot(tFil,UxFil)
+#	mpl.show()
 #
 ##	SO:	Function currently works BUT it is harsh when removing 
 ##		spikes after the first iteration ...
@@ -202,11 +206,11 @@ def PSF(data,method,writeString):
 #		will not be included!!
 #
 
-data = pd.read_pickle('../Data/processedData/dataFrames/8hz_x_400.0000_z_40.0000_data_weighted.pkl')
-U_raw = data.Ux.as_matrix()
+#data = pd.read_pickle('../Data/processedData/dataFrames/8hz_x_400.0000_z_40.0000_data_weighted.pkl')
+#U_raw = data.Ux.as_matrix()
 #spikeLocator(U_raw,'mean')
 
-PSF(data,'median')
+#PSF(data,'median')
 #
 #
 #
