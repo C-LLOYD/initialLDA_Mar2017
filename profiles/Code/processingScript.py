@@ -33,7 +33,7 @@ from phaseSpaceFilter import phaseSpaceFilter
 ##	1.	Loop over data: Put this in at the end
 #
 ##	2.	import txt file: Give a hard coded name for now
-path = "../Data/rawData/4hz/300mm/*/*.txt"
+path = "../Data/rawData/8hz/400mm/*/*.txt"
 data = []
 for fileName in glob.glob(path):
 	tempData = txtToDataFrame(fileName)
@@ -55,15 +55,15 @@ for fileName in glob.glob(path):
 print(data)
 #
 ##	Plot data
-mpl.scatter(data.z,data.UxMean)
+mpl.plot(data.z,data.UxMean,marker='o',linestyle=' ')
 mpl.show()
-mpl.scatter(data.z,data.UyMean)
+mpl.plot(data.z,data.UyMean,marker='o',linestyle=' ')
 mpl.show()
-mpl.scatter(data.z,data.uxRMS)
+mpl.plot(data.z,data.uxRMS,marker='o',linestyle=' ')
 mpl.show()
-mpl.scatter(data.z,data.uyRMS)
+mpl.plot(data.z,data.uyRMS,marker='o',linestyle=' ')
 mpl.show()
-mpl.scatter(data.z,data.uv)
+mpl.plot(data.z,data.uv,marker='o',linestyle=' ')
 mpl.show()
 ########################################################################################
 
