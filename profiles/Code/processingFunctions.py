@@ -172,7 +172,7 @@ def timeAverage (dataRaw):
 #		uv = np.nan
 ##	Create new dataFrame
 ##	NOTE	currently x position is assumed to be known from the file names ... 
-	z = pd.Series(dataRaw.NXYZ[3])
+	z = pd.Series(float(dataRaw.NXYZ[3]))
 	UxMean = pd.Series(UxMean)
 	UyMean = pd.Series(UyMean)
 	uxRMS = pd.Series(uxRMS)
