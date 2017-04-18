@@ -59,13 +59,13 @@ print(data)
 ####	1. 	define new variables
 ##	Initialise variables using the full data set and iterate to find log-law region by removing extremes of z
 U = data.UxMean.as_matrix()
-Y = data.z.as_matrix()
+Y = data.z.as_matrix()/1000
 #
 ##
-U_lam = U[0:20]
-Y_lam = Y[0:20]
-U_turb = U[-50:]
-Y_turb = Y[-50:]
+U_lam = U[0:15]
+Y_lam = Y[0:15]
+U_turb = U[-60:-10]
+Y_turb = Y[-60:-10]
 #
 ##	Initialise first guess at Beta
 betaHat_turb = np.sum((U_turb-np.mean(U_turb))*(np.log(Y_turb)-np.mean(np.log(Y_turb))))/np.sum((np.log(Y_turb)-np.mean(np.log(Y_turb)))**2)
@@ -73,17 +73,35 @@ alphaHat_turb = np.mean(U_turb) - betaHat_turb*np.mean(np.log(Y_turb))
 #
 betaHat_lam = np.sum((U_lam-np.mean(U_lam))*(Y_lam-np.mean(Y_lam)))/np.sum((Y_lam-np.mean(Y_lam))**2)
 alphaHat_lam = np.mean(U_lam) - betaHat_lam*np.mean(Y_lam)
+#
+##	Relate these to Utau and offset from wall
+Delta = alphaHat_lam/betaHat_lam
+#
+Utau = betaHat_turb*0.41
+#	Assume we know length scale and visc. of water:
+nu=1.1*10**(-6)
+ReTau = Utau*0.1/nu
+#
+##	Assume free stream velocity is equal the the velocity at the last point
+Cf = 2*Utau**2/U[-1]**2
+#
+print(ReTau,Cf)
+#
+yPlus = (Y*Utau/nu)#/1000
+UPlus = U/Utau
+print(yPlus,UPlus)
+#
 ##	Plot this
 loglawU = np.zeros(len(U))
-loglawU[:] = betaHat_turb*np.log(Y[:]) + alphaHat_turb
+loglawU[:] = 	(1/0.436)*np.log(yPlus)+6.13			#betaHat_turb*np.log(yPlus[:]) + alphaHat_turb
 lamlawU = np.zeros(len(U))
-lamlawU[:] = betaHat_lam*Y[:] + alphaHat_lam
+lamlawU[:] = 	yPlus			#betaHat_lam*yPlus[:] + alphaHat_lam
 ##
 #
-mpl.semilogx(Y,U,marker = 'o',linestyle = ' ')
-mpl.semilogx(Y,loglawU)
-mpl.semilogx(Y,lamlawU)
-mpl.axis([0,80,0,np.max(U)+0.05*np.max(U)])
+mpl.semilogx(yPlus,UPlus,marker = 'o',linestyle = ' ')
+mpl.semilogx(yPlus,loglawU)
+mpl.semilogx(yPlus,lamlawU)
+mpl.axis([0,600,0,np.max(UPlus)+0.05*np.max(UPlus)])
 mpl.show()
 
 
