@@ -33,7 +33,7 @@ from phaseSpaceFilter import phaseSpaceFilter
 ##	1.	Loop over data: Put this in at the end
 #
 ##	2.	import txt file: Give a hard coded name for now
-path = "../Data/rawData/8hz/400mm/*/*.txt"
+path = "../Data/rawData/8hz/300mm/*/*.txt"
 data = []
 for fileName in glob.glob(path):
 	tempData = txtToDataFrame(fileName)
@@ -64,45 +64,59 @@ Y = data.z.as_matrix()/1000
 ##
 U_lam = U[0:15]
 Y_lam = Y[0:15]
-U_turb = U[-60:-10]
-Y_turb = Y[-60:-10]
 #
-##	Initialise first guess at Beta
-betaHat_turb = np.sum((U_turb-np.mean(U_turb))*(np.log(Y_turb)-np.mean(np.log(Y_turb))))/np.sum((np.log(Y_turb)-np.mean(np.log(Y_turb)))**2)
-alphaHat_turb = np.mean(U_turb) - betaHat_turb*np.mean(np.log(Y_turb))
-#
+##	Compute alpha and beta for the laminar layer
 betaHat_lam = np.sum((U_lam-np.mean(U_lam))*(Y_lam-np.mean(Y_lam)))/np.sum((Y_lam-np.mean(Y_lam))**2)
 alphaHat_lam = np.mean(U_lam) - betaHat_lam*np.mean(Y_lam)
 #
-##	Relate these to Utau and offset from wall
-Delta = alphaHat_lam/betaHat_lam
-#
-Utau = betaHat_turb*0.41
-#	Assume we know length scale and visc. of water:
+##	Use these to estimate offset from the wall and Utau
 nu=1.1*10**(-6)
-ReTau = Utau*0.1/nu
+Delta = alphaHat_lam/betaHat_lam
+Utau = np.sqrt(betaHat_lam*nu)
+#
+##	Now remove the offset from Y
+Y = Y + Delta
+#
+##
+U_turb = U[-60:-10]
+Y_turb = Y[-60:-10]
+betaHat_turb = np.sum((U_turb-np.mean(U_turb))*(np.log(Y_turb)-np.mean(np.log(Y_turb))))/np.sum((np.log(Y_turb)-np.mean(np.log(Y_turb)))**2)
+print(betaHat_turb)
+alphaHat_turb = np.mean(U_turb) - betaHat_turb*np.mean(np.log(Y_turb))
+#
+##
+ReTau_lam = Utau*0.1/nu
+ReTau_turb = (0.1/nu)*0.4*betaHat_turb
 #
 ##	Assume free stream velocity is equal the the velocity at the last point
 Cf = 2*Utau**2/U[-1]**2
 #
-print(ReTau,Cf)
+print(ReTau_lam,ReTau_turb,Cf)
 #
 yPlus = (Y*Utau/nu)#/1000
 UPlus = U/Utau
-print(yPlus,UPlus)
+#print(yPlus,UPlus)
 #
 ##	Plot this
 loglawU = np.zeros(len(U))
-loglawU[:] = 	(1/0.436)*np.log(yPlus)+6.13			#betaHat_turb*np.log(yPlus[:]) + alphaHat_turb
+loglawU[:] = 	(1/0.4)*np.log(yPlus)+5.25			#betaHat_turb*np.log(yPlus[:]) + alphaHat_turb
 lamlawU = np.zeros(len(U))
 lamlawU[:] = 	yPlus			#betaHat_lam*yPlus[:] + alphaHat_lam
 ##
 #
-mpl.semilogx(yPlus,UPlus,marker = 'o',linestyle = ' ')
-mpl.semilogx(yPlus,loglawU)
-mpl.semilogx(yPlus,lamlawU)
-mpl.axis([0,600,0,np.max(UPlus)+0.05*np.max(UPlus)])
-mpl.show()
+mpl.rc('text', usetex=True)
+mpl.rc('font', family='serif')
+mpl.xticks(fontsize=25)
+mpl.yticks(fontsize=25)
+mpl.semilogx(yPlus,UPlus,marker = 'o',linestyle = ' ',color='k')
+mpl.semilogx(yPlus,loglawU,marker = ' ',linestyle = '-.',color='k',linewidth='1.5')
+mpl.semilogx(yPlus,lamlawU,marker = ' ',linestyle = '-',color='k',linewidth='1.5')
+mpl.axis([0,np.max(yPlus),0,np.max(UPlus)+0.05*np.max(UPlus)])
+mpl.xlabel(r'$\mathbf{z^+}$',fontsize=30)
+mpl.ylabel(r'$\mathbf{U^+}$',fontsize=30)
+#mpl.show()
+mpl.savefig('../Data/processedData/figures/tempProfile.png')
+mpl.close()
 
 
 

@@ -33,7 +33,9 @@ from phaseSpaceFilter import phaseSpaceFilter
 ##	1.	Loop over data: Put this in at the end
 #
 ##	2.	import txt file: Give a hard coded name for now
-path = "../Data/rawData/8Hz/*/*.txt"
+##		Note : 	There are two runs, both at 15mm from the plate. One at 8Hz and one at 4Hz.
+path = "../Data/rawData/4Hz/*/*.txt"
+save = "../Data/processedData/4Hz_15mm_"
 data = []
 for fileName in glob.glob(path):
 	tempData = txtToDataFrame(fileName)
@@ -56,16 +58,57 @@ data = data.sort_values(by='Xposition')
 ##		could plot them together for each variable
 ##		Also need to estimate errors due to short averaging times (30 sec)
 ##		Use this to plot error bars ...
-mpl.plot(data.Xposition,data.UxMean)
-mpl.show()
-mpl.plot(data.Xposition,data.UyMean)
-mpl.show()
-mpl.plot(data.Xposition,data.uxRMS)
-mpl.show()
-mpl.plot(data.Xposition,data.uyRMS)
-mpl.show()
-mpl.plot(data.Xposition,data.uv)
-mpl.show()
+#
+mpl.rc('text', usetex=True)
+mpl.rc('font', family='serif')
+mpl.xticks(fontsize=25)
+mpl.yticks(fontsize=25)
+mpl.plot(data.Xposition,data.UxMean,marker = 'o',linestyle = '-',color='k',linewidth='2')
+mpl.xlabel(r'$\mathbf{x}$ (mm)',fontsize=30)
+mpl.ylabel(r'$\mathbf{\left<U_x\right>}$ (m/s)',fontsize=30)
+mpl.savefig(save+'MeanUx.png')
+mpl.close()
+#
+mpl.rc('text', usetex=True)
+mpl.rc('font', family='serif')
+mpl.xticks(fontsize=25)
+mpl.yticks(fontsize=25)
+mpl.plot(data.Xposition,data.UyMean,marker = 'o',linestyle = '-',color='k',linewidth='2')
+mpl.xlabel(r'$\mathbf{x}$ (mm)',fontsize=30)
+mpl.ylabel(r'$\mathbf{\left<U_y\right>}$ (m/s)',fontsize=30)
+mpl.savefig(save+'MeanUy.png')
+mpl.close()
+#
+mpl.rc('text', usetex=True)
+mpl.rc('font', family='serif')
+mpl.xticks(fontsize=25)
+mpl.yticks(fontsize=25)
+mpl.plot(data.Xposition,data.uxRMS,marker = 'o',linestyle = '-',color='k',linewidth='2')
+mpl.xlabel(r'$\mathbf{x}$ (mm)',fontsize=30)
+mpl.ylabel(r'RMS($\mathbf{u_x}$) (m/s)',fontsize=30)
+mpl.savefig(save+'RMSux.png')
+mpl.close()
+#
+mpl.rc('text', usetex=True)
+mpl.rc('font', family='serif')
+mpl.xticks(fontsize=25)
+mpl.yticks(fontsize=25)
+mpl.plot(data.Xposition,data.uyRMS,marker = 'o',linestyle = '-',color='k',linewidth='2')
+mpl.xlabel(r'$\mathbf{x}$ (mm)',fontsize=30)
+mpl.ylabel(r'RMS($\mathbf{u_y}$) (m/s)',fontsize=30)
+mpl.savefig(save+'RMSuy.png')
+mpl.close()
+#
+mpl.rc('text', usetex=True)
+mpl.rc('font', family='serif')
+mpl.xticks(fontsize=25)
+mpl.yticks(fontsize=25)
+mpl.plot(data.Xposition,data.uv,marker = 'o',linestyle = '-',color='k',linewidth='2')
+mpl.xlabel(r'$\mathbf{x}$ (mm)',fontsize=30)
+mpl.ylabel(r'$\mathbf{u_x u_y}$ $\mathbf{(m^2/s^2)}$',fontsize=30)
+mpl.savefig(save+'uv.png')
+mpl.close()
+#
 #######################################################################################
 
 
