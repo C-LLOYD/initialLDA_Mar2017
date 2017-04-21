@@ -21,6 +21,7 @@
 ###########################################################################################
 ####
 ##		Initialise python
+from mpl_toolkits.axes_grid1 import host_subplot
 import numpy as np			#Numpy for efficient numerics
 import re				#Re for matching text in strings
 import matplotlib.pyplot as mpl		#matplotlib for plotting
@@ -328,6 +329,8 @@ def plotter(**kargs):
 	data 		= 	kargs['data'];
 	writeName	=	kargs['writeName'];
 	legend	=	kargs['legend'];
+
+
 #	Plot the variables
 	mpl.rc('text', usetex=True)
 #	mpl.rc('font', family='serif')
@@ -399,6 +402,162 @@ def plotter(**kargs):
 #	mpl.tight_layout()
 	mpl.xticks(fontsize=25)
 	mpl.yticks(fontsize=25)
+##	Set up write string:
+##	Take position from data file (NXYZ)
+##	Take variable name from writeNamestr(int(float(d.NXYZ[1])))
+	writePath = writeString+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+'_'+writeName
+	print(writePath)
+	mpl.savefig(writePath)
+#	mpl.show()
+	mpl.close()
+	return
+
+###########################################################################################
+####	Function Definition:		Double plotter					  ###########
+####
+####		Temporarily two plotters : This one plots two X axis for time and sampleN
+####
+####	This function takes a data frame, currently just consisting of raw data, and plots
+####	the convergence of the calculated statistics. This will later be adapted to plot 
+####	both filtered data and un-biased velocity data.
+####
+####		Current stats: UxMean, UyMean, uxRMS, uyRMS, uv
+####
+###########################################################################################
+#
+##	Embedded bounds function: This is used to calculate +/- bounds for convergence and
+##	used to limit axis range.
+##
+##	Input: 	convergedValue:	This values is the estimated converged value of the stat
+##				in question. This is either taken as the final value in
+##				the variable vector, or it is averaged over the last 30
+##				seconds of sampling (determined by user).
+##		
+##		scalar:		This value is the scalar to be multiplied to the converged
+##				value i.e 0.01 will give (conv + 1%(conv)) as an upper 
+##				bound, -0.01 will give a lower bound. 
+##
+####
+####	Plotting Function:
+####
+##	This script reads in two variables to be plotted, a save string for the output
+##	png, a convergence method, and an axis limiter specification.
+##
+##	writeString:	Path of which the png is written. This also contains the first
+##			part of the file name.
+##
+##	data:		Data frame containing probe position and time vector (required 
+##			for plotting and saving).
+##
+##	time:		Time variable, taken from data frame. 
+##
+##	U:		Variable for plotting. Conv. definitions are based on this.
+##
+##	V:		Variable for plotting.
+##
+##	W:		Variable for plotting.
+##	
+##	convMethod:	Takes input either 'MEAN' or 'END'. Conv method is selected based
+##			on this.
+##
+##	axis:		Takes either 'FALSE' or [upper,lower]. The upper, lower limits are
+##			factors of the estimated converged values.
+##
+##	xlabel:		x-axis label as a string.
+##
+##	ylabel:		y-label as a string. This is currently also used for the save name.
+##	
+def doublePlotter(**kargs):
+	time1   	= 	kargs['time1'];
+	time2  	= 	kargs['time2'];
+	time3   	= 	kargs['time3'];
+	time4  	= 	kargs['time4'];
+	N1  	 	= 	kargs['N1'];
+	N2  		= 	kargs['N2'];
+	N3   		= 	kargs['N3'];
+	N4  		= 	kargs['N4'];	
+	U1	 	= 	kargs['U1'];		
+	U2 		= 	kargs['U2'];		
+	U3 		= 	kargs['U3'];
+	U4		= 	kargs['U4'];		
+	U1label 	= 	kargs['U1label'];
+	U2label	= 	kargs['U2label'];
+	U3label 	= 	kargs['U3label'];		
+	U4label 	= 	kargs['U4label'];
+	ylabel 	= 	kargs['ylabel'];			
+	xlabel 	= 	kargs['xlabel'];		
+	axis 		= 	kargs['axis'];
+	writeString = 	kargs['writeString'];
+	convMethod 	= 	kargs['convMethod'];
+	data 		= 	kargs['data'];
+	writeName	=	kargs['writeName'];
+	legend	=	kargs['legend'];
+#
+#	Plot the variables
+#	mpl.rc('text', usetex=True)
+	mpl.rc('font', **{'family': 'serif', 'serif': ['Computer Modern'], 'size':'20'})
+	mpl.rc('text', usetex=True)
+#	mpl.rc('text.usetex':True ,'font.family':'serif', 'font.size':'15')
+#
+	fig = mpl.figure()
+	ax1 = fig.add_subplot(1,1,1)
+	ax1.plot(time1,U1,color='k',linestyle='-.',linewidth='3')
+	ax1.plot(time2,U2,color='k',linestyle='-',linewidth='2')
+	ax1.plot(time3,U3,color='r',linestyle='-.',linewidth='3')
+	ax1.plot(time4,U4,color='r',linestyle='-',linewidth='2')
+	ax1.set_xlabel('t (s)',fontsize='30')
+	ax1.set_ylabel(ylabel,fontsize='30')
+#
+##	Set up convergence criteria
+##	If None is given, provide a converged criteria but don't plot it
+##	Converged is necessary for the axis limits to work
+	if convMethod == None:
+		converged = pd.Series.tolist(U4)[-1]
+	else:
+#	If a MEAN converged value is wanted then average over the last 30 seconds of samples
+		if convMethod == 'MEAN':
+			converged = np.mean(U4.loc[time4[:]>270])
+		else:
+#	Else we simply take the last value - This is better for steady convergence behaviour
+			converged = pd.Series.tolist(U4)[-1]
+#	ONLY PLOT THE BOUNDS IF CONVERGENCE CRITERIA IS GIVEN
+##	Set up +/-5% bounds:
+		plus5 = bound(converged,0.05)
+		min5 = bound(converged,-0.05)
+##	Set up +/-1% bounds:
+		plus1 = bound(converged,0.01)
+		min1 = bound(converged,-0.01)
+##	Plot these additional bounds
+		ax1.plot(time4,plus5*len(U4),color='k',linestyle=':',linewidth='1.5')
+		ax1.plot(time4,min5*len(U4),color='k',linestyle=':',linewidth='1.5')
+		ax1.plot(time4,plus1*len(U4),color='k',linestyle='-.',linewidth='1.5')
+		ax1.plot(time4,min1*len(U4),color='k',linestyle='-.',linewidth='1.5')
+#	Set up axis limits
+	if axis == None:
+		pass
+	else:
+		yUpper = bound(converged,axis[1])
+		yLower = bound(converged,axis[0])
+		if yUpper > yLower:
+			ax1.axis([np.min(time4),np.max(time4),yLower[0],yUpper[0]])
+		else:
+			ax1.axis([np.min(time4),np.max(time4),yUpper[0],yLower[0]])
+#
+	if legend == None:
+		pass
+	else:
+		ax1.legend()
+#
+#	mpl.tight_layout()
+
+#	mpl.axes().xaxis.grid(True,linestyle='-')
+	ax2 = ax1.twiny()
+	ax2.set_xlabel('N',fontsize='30')
+	N = len(N1)
+	ax2.set_xticks([1,2,3,4,5,6])
+	ax2.set_xticklabels([int(N/6),int(2*N/6),int(3*N/6),int(4*N/6),int(5*N/6),int(N)])
+#	mpl.xticks(fontsize=25)
+#	mpl.yticks(fontsize=25)
 ##	Set up write string:
 ##	Take position from data file (NXYZ)
 ##	Take variable name from writeNamestr(int(float(d.NXYZ[1])))
