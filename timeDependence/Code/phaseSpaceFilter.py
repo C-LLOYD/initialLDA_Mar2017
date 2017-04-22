@@ -6,7 +6,6 @@
 #
 ##	Initialise python
 import numpy as np
-import re
 import matplotlib.pyplot as mpl
 from matplotlib import rcParams
 rcParams.update({'figure.autolayout': True})
@@ -18,7 +17,7 @@ from scipy.special import erfinv
 ##	Define the filtering function:
 ##	Input: velocity and method
 ##	Output: index of spikes after several loops.
-def spikeLocator(U,data,method,writePaths_figures,VariableName):
+def phaseSpaceFilter(U,window,data,method,writePaths_figures,VariableName):
 	if 	method == 'mean':
 		U = U - np.mean(U)
 	elif 	method == 'median':
@@ -102,82 +101,39 @@ def spikeLocator(U,data,method,writePaths_figures,VariableName):
 #
 ##	Plot phase space:
 ##	Convert back to cart. to plot ellipse
-	N=27
+#	N=27
 #
-	theta = np.linspace(0,2*np.pi,N)
-	phi = np.linspace(0,np.pi,N)
-#
+#	theta = np.linspace(0,2*np.pi,N)
+#	phi = np.linspace(0,np.pi,N)
+##
 ##	Use definition from Wahl (reference)
-	X = a*(np.outer(np.sin(phi),np.cos(theta))*np.cos(alpha)+np.outer(np.cos(phi),np.ones(N))*np.sin(alpha))
-	Y = b*(np.outer(np.sin(phi),np.cos(theta))*np.sin(alpha)-np.outer(np.cos(phi),np.ones(N))*np.cos(alpha))
-	Z = c*(np.outer(np.sin(phi),np.sin(theta)))
+#	X = a*(np.outer(np.sin(phi),np.cos(theta))*np.cos(alpha)+np.outer(np.cos(phi),np.ones(N))*np.sin(alpha))
+#	Y = b*(np.outer(np.sin(phi),np.cos(theta))*np.sin(alpha)-np.outer(np.cos(phi),np.ones(N))*np.cos(alpha))
+#	Z = c*(np.outer(np.sin(phi),np.sin(theta)))
 #
 ##
-	writePath = writePaths_figures+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+'_'+VariableName+'_phaseSpacePlot.png'
+#	writePath = writePaths_figures+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+'_'+VariableName+'_phaseSpacePlot.png'
 #
 ##
-	fig= mpl.figure()
-	mpl.rc('text', usetex=True)
-	ax = fig.gca(projection='3d')
-	ax.plot_wireframe(X,Y,Z)
-	ax.scatter(U[(rho<rho_e)], dU[(rho<rho_e)],d2U[(rho<rho_e)], zdir='z',color='k')
-	ax.scatter(U[(rho>rho_e)], dU[(rho>rho_e)],d2U[(rho>rho_e)], zdir='z',color='r')
-	ax.set_xlabel(r'$\mathbf{U}$ (m/s)',fontsize=20)
-	ax.xaxis.labelpad=15
-	ax.set_ylabel(r'$\mathbf{d U}$ (m/s)',fontsize=20)
-	ax.yaxis.labelpad=15
-	ax.set_zlabel(r'$\mathbf{d^2 U}$ (m/s)',fontsize=20)
-	ax.zaxis.labelpad=15
+#	fig= mpl.figure()
+#	mpl.rc('text', usetex=True)
+#	ax = fig.gca(projection='3d')
+#	ax.plot_wireframe(X,Y,Z)
+#	ax.scatter(U[(rho<rho_e)], dU[(rho<rho_e)],d2U[(rho<rho_e)], zdir='z',color='k')
+#	ax.scatter(U[(rho>rho_e)], dU[(rho>rho_e)],d2U[(rho>rho_e)], zdir='z',color='r')
+#	ax.set_xlabel(r'$\mathbf{U}$ (m/s)',fontsize=20)
+#	ax.xaxis.labelpad=15
+#	ax.set_ylabel(r'$\mathbf{d U}$ (m/s)',fontsize=20)
+#	ax.yaxis.labelpad=15
+#	ax.set_zlabel(r'$\mathbf{d^2 U}$ (m/s)',fontsize=20)
+#	ax.zaxis.labelpad=15
 ##	We could save the plot but currently this saves on every loop: Not useful!
 ##	Have it save on only the first loop or not at all.
-	mpl.savefig(writePath)
+#	mpl.savefig(writePath)
 #	mpl.show()
-	mpl.close()
+#	mpl.close()
 #
 	return newSpikes
 
-#
-##	Define function
-def phaseSpaceFilter(data,method,writePaths_figures,writePath_dataFrames):
-#
-##	Decompose the important components of the dataframe:
-	Ux = data.Ux.as_matrix()
-	Uy = data.Uy.as_matrix()
-	t = data.timeStamp.as_matrix()
-	s = data.sampleNumber.as_matrix()
-	resT = data.resTime.as_matrix()
-#
-##	Initialise filtered velocity fields
-	XSpikes = spikeLocator(Ux,data,method,writePaths_figures,'Ux')
-	YSpikes = spikeLocator(Uy,data,method,writePaths_figures,'Uy')
-	Spikes = XSpikes + YSpikes
-	N_Spikes = sum(Spikes)
-	print("Number of Ux spikes: "+str(sum(XSpikes)))
-	print("Number of Uy spikes: "+str(sum(YSpikes)))
-	print("Total number of spikes: "+str(N_Spikes)+" = "+
-		str(N_Spikes*float(100)/len(Ux))+"%")
-	Ux = Ux[~Spikes]
-	Uy = Uy[~Spikes]
-	t  = t[~Spikes]
-	resT  = resT[~Spikes]
-	s  = s[~Spikes]
-#
-##	Add variables to existing data frame.
-##	Variables first need to be converted to 'pandas.series'
-	Ux = pd.Series(Ux)
-	Uy = pd.Series(Uy)
-	t = pd.Series(t)
-	s = pd.Series(s)
-	resT = pd.Series(resT)
-#
-	data['Ux']= Ux
-	data['Uy']= Uy
-	data['timeStamp']= t
-	data['sampleNumber']=s
-	data['resTime']=resT
-####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
-#	data.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+'_data_filtered.pkl')
-	return data;
-##
 ##
 ##
