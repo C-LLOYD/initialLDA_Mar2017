@@ -29,6 +29,8 @@ def Filter(data,filterMethod,averageMethod,window,writePaths_figures,writePath_d
 	t = data.timeStamp.as_matrix()
 	s = data.sampleNumber.as_matrix()
 	resT = data.resTime.as_matrix()
+	NXYZ = data.NXYZ.as_matrix().astype(np.float)
+	NXYZ = NXYZ[~np.isnan(NXYZ)]
 	halfWindow = int(window/2)
 #
 ##
@@ -56,68 +58,38 @@ def Filter(data,filterMethod,averageMethod,window,writePaths_figures,writePath_d
 #
 ##	
 	while ~converged:
-		test = len(UxNew[~Spikes])
+		print('Number of spikes = '+str(len(Ux)-len(UxNew))+' = '+str((float(len(Ux))-float(len(UxNew)))/float(len(Ux)/100))+'%')
+		
 		XSpikes = Filter(UxNew,window,data,averageMethod,writePaths_figures,'Ux')
 		YSpikes = Filter(UyNew,window,data,averageMethod,writePaths_figures,'Uy')
 #
-		Spikes = XSpikes + YSpikes + Spikes
-		N_Spikes = sum(Spikes)
-#		print("Number of new Ux spikes: "+str(sum(XSpikes)))
-#		print("Number of new Uy spikes: "+str(sum(YSpikes)))
-		print("Total number of spikes: "+str(N_Spikes)+" = "+
-			str(N_Spikes*float(100)/len(data.Uy.as_matrix()))+"%")
-		if test==len(UxNew[~Spikes]):
+		Spikes = XSpikes + YSpikes
+		if len(UxNew) == len(UxNew[~Spikes]):#		test==len(UxNew[~Spikes]):
 			break
 #
 		else:
-			UxNewNew = UxNew#np.zeros(len(UxNew))
-			UyNewNew = UyNew#np.zeros(len(UxNew))
-			if filterMethod == 'phaseSpaceFilter':
-				UxNewNew[Spikes] = np.nan
-				UyNewNew[Spikes] = np.nan	
-#				pass
-			
-			else:
-				UxNewNew[Spikes] = np.nan
-				UyNewNew[Spikes] = np.nan
-#				for i in range(len(UxNew)):
-#					if Spikes[i]==True:
-#						if i==0:
-#							UxNewNew[i]=UxNew[i+1]
-#							UyNewNew[i]=UyNew[i+1]
-#						elif i==range(len(UxNew))[-1]:
-#							UxNewNew[i]=UxNew[i-1]
-#							UyNewNew[i]=UyNew[i-1]
-#						else:
-#							UxNewNew[i] = np.mean(UxNew[i-1:i+1])
-#							UyNewNew[i] = np.mean(UyNew[i-1:i+1])
-#				else:
-#					UxNewNew[i] = UxNew[i]
-#					UyNewNew[i] = UyNew[i]
-#
-#		mpl.plot(UyNew,marker='o')
-#		mpl.plot(UyNewNew,marker='x')
-#		mpl.show()
-		UxNew = UxNewNew
-		UyNew = UyNewNew
+			UxNew 		= UxNew[~Spikes]
+			UyNew 		= UyNew[~Spikes]
+			t	  	= t[~Spikes]
+			resT	  	= resT[~Spikes]
+			s	  	= s[~Spikes]
+
 #
 #	Ux = Ux[~Spikes]
 #	Uy = Uy[~Spikes]		
-#	t  = t[~Spikes]
-#	resT  = resT[~Spikes]
-#	s  = s[~Spikes]
+#
 #	Spikes = None
 #
 #
 ##	Add variables to existing data frame.
 ##	Variables first need to be converted to 'pandas.series'
-	Ux = pd.Series(UxNew)
-	Uy = pd.Series(UyNew)
-	timeStamp = pd.Series(t)
-	sampleNumber = pd.Series(s)
-	resTime = pd.Series(resT)
-	data2 = pd.DataFrame({'NXYZ':data.NXYZ,'sampleNumber':sampleNumber,
-			'timeStamp':timeStamp,'resTime':resTime,'Ux':Ux,'Uy':Uy})
+	UxNew = pd.Series(UxNew)
+	UyNew = pd.Series(UyNew)
+	t = pd.Series(t)
+	s = pd.Series(s)
+	resT = pd.Series(resT)
+	data2 = pd.DataFrame({'NXYZ':pd.Series(NXYZ),'sampleNumber':s,
+			'timeStamp':t,'resTime':resT,'Ux':UxNew,'Uy':UyNew})
 #
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
 	data2.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+'_data_'+fileAppend)
