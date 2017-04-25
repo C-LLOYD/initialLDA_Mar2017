@@ -92,10 +92,43 @@ dataFrames_ma_filtered = [
 "../Data/processedData/dataFrames/8hz_x_400_z_15_data_filtered_moving_average_weighted.pkl",
 "../Data/processedData/dataFrames/8hz_x_400_z_40_data_filtered_moving_average_weighted.pkl"
 ]
+
+dataFrames_ga_filtered = [
+"../Data/processedData/dataFrames/4hz_x_400_z_1_data_filtered_global_average_weighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400_z_15_data_filtered_global_average_weighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400_z_40_data_filtered_global_average_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_1_data_filtered_global_average_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_15_data_filtered_global_average_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_40_data_filtered_global_average_weighted.pkl"
+]
+
+dataFrames_ps_filtered = [
+"../Data/processedData/dataFrames/4hz_x_400_z_1_data_filtered_phase_space_weighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400_z_15_data_filtered_phase_space_weighted.pkl",
+"../Data/processedData/dataFrames/4hz_x_400_z_40_data_filtered_phase_space_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_1_data_filtered_phase_space_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_15_data_filtered_phase_space_weighted.pkl",
+"../Data/processedData/dataFrames/8hz_x_400_z_40_data_filtered_phase_space_weighted.pkl"
+]
+
 #data=pd.read_pickle("../Data/processedData/dataFrames/4hz_x_400_z_1_data_filtered_moving_average_weighted.pkl")
-plot = False
+plotTimeDep = False
+plotFilDep = True
 axis = [-0.6,0.6]
-for i in [0,1,2,3,4,5]:
+
+if plotFilDep == True:
+	data_fil_raw = pd.read_pickle(dataFrames_weighted[0])
+	data_fil_ga = pd.read_pickle(dataFrames_ga_filtered[0])
+	data_fil_ma = pd.read_pickle(dataFrames_ma_filtered[0])
+	data_fil_ps = pd.read_pickle(dataFrames_ps_filtered[0])
+#
+	mpl.plot(data_fil_raw.timeStamp,data_fil_raw.uyRMS,linestyle='-')
+	mpl.plot(data_fil_ga.timeStamp,data_fil_ga.uyRMS,linestyle=':')
+	mpl.plot(data_fil_ma.timeStamp,data_fil_ma.uyRMS,linestyle='-.')
+	mpl.plot(data_fil_ps.timeStamp,data_fil_ps.uyRMS,linestyle='--')
+	mpl.show()
+
+for i in [0]:#,1,2,3,4,5]:
 	print(fileNames[i])
 	data_raw = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
 	print('Moving Average:')
@@ -104,20 +137,29 @@ for i in [0,1,2,3,4,5]:
 	data_fil_ps = Filter(data_raw,'phaseSpaceFilter','mean',20,writePaths_figures[i],writePaths_dataFrames[i])
 	print('Global Average:')
 	data_fil_ga = Filter(data_raw,'globalAverageFilter','mean',20,writePaths_figures[i],writePaths_dataFrames[i])
+#	
 #		
 #
-#	data_unwei = rawToProcessed_unweighted(data_raw,writePaths_dataFrames[i],'_data_unweighted.pkl')
-#	data_wei = rawToProcessed_weighted(data_unwei,writePaths_dataFrames[i],'_data_weighted.pkl')
-#	data_fil = movingAverageFilter(data_raw,'mean',writePaths_figures[i],writePaths_dataFrames[i])
-#	data_fil_unwei = rawToProcessed_unweighted(data_fil,writePaths_dataFrames[i],'_data_filtered_moving_average_unweighted.pkl')
-#	data_fil_wei = rawToProcessed_weighted(data_fil_unwei,writePaths_dataFrames[i],'_data_filtered_moving_average_weighted.pkl')
+	data_unwei 		= 	rawToProcessed_unweighted(data_raw			,writePaths_dataFrames[i],'_data_unweighted.pkl')
+	data_wei 		= 	rawToProcessed_weighted(data_unwei			,writePaths_dataFrames[i],'_data_weighted.pkl')
+	data_fil_ma_unwei = 	rawToProcessed_unweighted(data_fil_ma		,writePaths_dataFrames[i],'_data_filtered_moving_average_unweighted.pkl')
+	data_fil_ma_wei 	= 	rawToProcessed_weighted(data_fil_ma_unwei	,writePaths_dataFrames[i],'_data_filtered_moving_average_weighted.pkl')
+	data_fil_ga_unwei = 	rawToProcessed_unweighted(data_fil_ga		,writePaths_dataFrames[i],'_data_filtered_global_average_unweighted.pkl')
+	data_fil_ga_wei 	= 	rawToProcessed_weighted(data_fil_ga_unwei	,writePaths_dataFrames[i],'_data_filtered_global_average_weighted.pkl')
+	data_fil_ps_unwei = 	rawToProcessed_unweighted(data_fil_ps		,writePaths_dataFrames[i],'_data_filtered_phase_space_unweighted.pkl')
+	data_fil_ps_wei 	= 	rawToProcessed_weighted(data_fil_ps_unwei	,writePaths_dataFrames[i],'_data_filtered_phase_space_weighted.pkl')
+#
+
+#
 #	data1 = pd.read_pickle(dataFrames_weighted[i])
 #	data2 = pd.read_pickle(dataFrames_ma_filtered[i])
-#
+#	data3 = pd.read_pickle(dataFrames_ga_filtered[i])
+#	data4 = pd.read_pickle(dataFrames_ps_filtered[i])
+
 ##	Plotting functions:
 #
 ##	Plot mean Ux
-	if plot == True:
+	if plotTimeDep == True:
 		doublePlotter(writeString=writePaths_figures[i],	data=data1,	time1=data1.timeStamp,	
 		time2=data1.timeStamp,	time3=data2.timeStamp,	time4=data2.timeStamp,
 		N1=data1.sampleNumber,	

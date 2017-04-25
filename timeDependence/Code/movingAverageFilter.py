@@ -16,7 +16,7 @@ import numpy as np
 ##	Output: index of spikes after several loops.
 def movingAverageFilter(U,window,data,method,writePaths_figures,VariableName):
 #	Half the window for consistency
-	W = window/2
+	W = int(window/2)
 #
 ##	We loop through the length of U and take neighbouring points ....
 ##	For the first and last few points we can't do this! - Just use a slight weighting.

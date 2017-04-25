@@ -29,13 +29,12 @@ def Filter(data,filterMethod,averageMethod,window,writePaths_figures,writePath_d
 	t = data.timeStamp.as_matrix()
 	s = data.sampleNumber.as_matrix()
 	resT = data.resTime.as_matrix()
-	halfWindow = window/2
+	halfWindow = int(window/2)
 #
 ##
 	UyNew = Uy
 	UxNew = Ux
 	Spikes = np.isnan(UxNew)	#Spikes are initialised based on the number of NANS in UxNew - there should be zero ... 
-	print(Spikes)
 	converged = False
 ##	Initialise filtered velocity fields
 ##
@@ -63,31 +62,42 @@ def Filter(data,filterMethod,averageMethod,window,writePaths_figures,writePath_d
 #
 		Spikes = XSpikes + YSpikes + Spikes
 		N_Spikes = sum(Spikes)
-		print("Number of new Ux spikes: "+str(sum(XSpikes)))
-		print("Number of new Uy spikes: "+str(sum(YSpikes)))
+#		print("Number of new Ux spikes: "+str(sum(XSpikes)))
+#		print("Number of new Uy spikes: "+str(sum(YSpikes)))
 		print("Total number of spikes: "+str(N_Spikes)+" = "+
 			str(N_Spikes*float(100)/len(data.Uy.as_matrix()))+"%")
 		if test==len(UxNew[~Spikes]):
 			break
 #
 		else:
-			UxNewNew = np.zeros(len(UxNew))
-			UyNewNew = np.zeros(len(UxNew))
-			for i in range(len(UxNew)):
-				if Spikes[i]==True:
-#					UxNew[i] = np.nan
-					if i==0:
-						UxNewNew[i]=UxNew[i+1]
-						UyNewNew[i]=UyNew[i+1]
-					elif i==range(len(UxNew))[-1]:
-						UxNewNew[i]=UxNew[i-1]
-						UyNewNew[i]=UyNew[i-1]
-					else:
-						UxNewNew[i] = np.mean(UxNew[i-1:i+1])
-						UyNewNew[i] = np.mean(UyNew[i-1:i+1])
-				else:
-					UxNewNew[i] = UxNew[i]
-					UyNewNew[i] = UyNew[i]
+			UxNewNew = UxNew#np.zeros(len(UxNew))
+			UyNewNew = UyNew#np.zeros(len(UxNew))
+			if filterMethod == 'phaseSpaceFilter':
+				UxNewNew[Spikes] = np.nan
+				UyNewNew[Spikes] = np.nan	
+#				pass
+			
+			else:
+				UxNewNew[Spikes] = np.nan
+				UyNewNew[Spikes] = np.nan
+#				for i in range(len(UxNew)):
+#					if Spikes[i]==True:
+#						if i==0:
+#							UxNewNew[i]=UxNew[i+1]
+#							UyNewNew[i]=UyNew[i+1]
+#						elif i==range(len(UxNew))[-1]:
+#							UxNewNew[i]=UxNew[i-1]
+#							UyNewNew[i]=UyNew[i-1]
+#						else:
+#							UxNewNew[i] = np.mean(UxNew[i-1:i+1])
+#							UyNewNew[i] = np.mean(UyNew[i-1:i+1])
+#				else:
+#					UxNewNew[i] = UxNew[i]
+#					UyNewNew[i] = UyNew[i]
+#
+#		mpl.plot(UyNew,marker='o')
+#		mpl.plot(UyNewNew,marker='x')
+#		mpl.show()
 		UxNew = UxNewNew
 		UyNew = UyNewNew
 #
@@ -101,13 +111,13 @@ def Filter(data,filterMethod,averageMethod,window,writePaths_figures,writePath_d
 #
 ##	Add variables to existing data frame.
 ##	Variables first need to be converted to 'pandas.series'
-	UxNew = pd.Series(UxNew)
-	UyNew = pd.Series(UyNew)
-	t = pd.Series(t)
-	s = pd.Series(s)
-	resT = pd.Series(resT)
-	data2 = pd.DataFrame({'NXYZ':data.NXYZ,'sampleNumber':s,
-			'timeStamp':t,'resTime':resT,'Ux':UxNew,'Uy':UyNew})
+	Ux = pd.Series(UxNew)
+	Uy = pd.Series(UyNew)
+	timeStamp = pd.Series(t)
+	sampleNumber = pd.Series(s)
+	resTime = pd.Series(resT)
+	data2 = pd.DataFrame({'NXYZ':data.NXYZ,'sampleNumber':sampleNumber,
+			'timeStamp':timeStamp,'resTime':resTime,'Ux':Ux,'Uy':Uy})
 #
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
 	data2.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+'_data_'+fileAppend)
