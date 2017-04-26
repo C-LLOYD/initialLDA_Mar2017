@@ -31,7 +31,6 @@ def Filter(data,filterMethod,averageMethod,window,writePaths_figures,writePath_d
 	resT = data.resTime.as_matrix()
 	NXYZ = data.NXYZ.as_matrix().astype(np.float)
 	NXYZ = NXYZ[~np.isnan(NXYZ)]
-	halfWindow = int(window/2)
 #
 ##
 	UyNew = Uy
@@ -67,19 +66,14 @@ def Filter(data,filterMethod,averageMethod,window,writePaths_figures,writePath_d
 		if len(UxNew) == len(UxNew[~Spikes]):#		test==len(UxNew[~Spikes]):
 			break
 #
+##	Spike replacement: 	We have two options, either remove the data or replace
+##					with a local average. Currently code simply removes bad data. 
 		else:
-			UxNew 		= UxNew[~Spikes]
-			UyNew 		= UyNew[~Spikes]
+			UxNew 	= UxNew[~Spikes]
+			UyNew 	= UyNew[~Spikes]
 			t	  	= t[~Spikes]
 			resT	  	= resT[~Spikes]
 			s	  	= s[~Spikes]
-
-#
-#	Ux = Ux[~Spikes]
-#	Uy = Uy[~Spikes]		
-#
-#	Spikes = None
-#
 #
 ##	Add variables to existing data frame.
 ##	Variables first need to be converted to 'pandas.series'

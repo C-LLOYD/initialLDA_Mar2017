@@ -117,25 +117,28 @@ plotFilDep = True
 axis = [-0.6,0.6]
 
 if plotFilDep == True:
+#
+##	This loop plots data for filter type dependence - the data set and variables chosen
+##	are particularly 'poor'
 	data_fil_raw = pd.read_pickle(dataFrames_weighted[0])
 	data_fil_ga = pd.read_pickle(dataFrames_ga_filtered[0])
 	data_fil_ma = pd.read_pickle(dataFrames_ma_filtered[0])
 	data_fil_ps = pd.read_pickle(dataFrames_ps_filtered[0])
-#
-	mpl.plot(data_fil_raw.timeStamp,data_fil_raw.uyRMS,linestyle='-')
-	mpl.plot(data_fil_ga.timeStamp,data_fil_ga.uyRMS,linestyle=':')
-	mpl.plot(data_fil_ma.timeStamp,data_fil_ma.uyRMS,linestyle='-.')
-	mpl.plot(data_fil_ps.timeStamp,data_fil_ps.uyRMS,linestyle='--')
+##
+	mpl.plot(data_fil_raw.timeStamp,data_fil_raw.uyRMS,linestyle='-',color = 'k')
+	mpl.plot(data_fil_ga.timeStamp,data_fil_ga.uyRMS,linestyle='-.',color = 'k')
+	mpl.plot(data_fil_ma.timeStamp,data_fil_ma.uyRMS,linestyle='--',color = 'k')
+	mpl.plot(data_fil_ps.timeStamp,data_fil_ps.uyRMS,linestyle=':',color = 'k')
 	mpl.show()
 #
-	mpl.plot(data_fil_raw.timeStamp,data_fil_raw.Uy,linestyle='-')
-	mpl.plot(data_fil_ga.timeStamp,data_fil_ga.Uy,linestyle=':')
-	mpl.plot(data_fil_ma.timeStamp,data_fil_ma.Uy,linestyle='-.')
-	mpl.plot(data_fil_ps.timeStamp,data_fil_ps.Uy,linestyle='--')
+	mpl.plot(data_fil_raw.timeStamp,data_fil_raw.Uy,linestyle='-',color = 'k')
+	mpl.plot(data_fil_ga.timeStamp,data_fil_ga.Uy,marker='o',linestyle=' ',color = 'k')
+	mpl.plot(data_fil_ma.timeStamp,data_fil_ma.Uy,marker='*',linestyle=' ',color = 'k')
+	mpl.plot(data_fil_ps.timeStamp,data_fil_ps.Uy,marker='x',linestyle=' ',color = 'k')
 	mpl.show()
 
-for i in [0]:#,1,2,3,4,5]:
-	print(fileNames[i])
+for i in [0,1,2,3,4,5]:
+#	print(fileNames[i])
 #	data_raw = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
 #	print('Moving Average:')
 #	data_fil_ma = Filter(data_raw,'movingAverageFilter','mean',20,writePaths_figures[i],writePaths_dataFrames[i])
@@ -149,13 +152,13 @@ for i in [0]:#,1,2,3,4,5]:
 #	data_unwei 		= 	rawToProcessed_unweighted(data_raw			,writePaths_dataFrames[i],'_data_unweighted.pkl')
 #	data_wei 		= 	rawToProcessed_weighted(data_unwei			,writePaths_dataFrames[i],'_data_weighted.pkl')
 #	data_fil_ma_unwei = 	rawToProcessed_unweighted(data_fil_ma		,writePaths_dataFrames[i],'_data_filtered_moving_average_unweighted.pkl')
-#	data_fil_ma_wei 	= 	rawToProcessed_weighted(data_fil_ma_unwei	,writePaths_dataFrames[i],'_data_filtered_moving_average_weighted.pkl')
+#	data_fil_ma_wei 	= 	rawToProcessed_weighted(data_fil_ma_unwei		,writePaths_dataFrames[i],'_data_filtered_moving_average_weighted.pkl')
 #	data_fil_ga_unwei = 	rawToProcessed_unweighted(data_fil_ga		,writePaths_dataFrames[i],'_data_filtered_global_average_unweighted.pkl')
-#	data_fil_ga_wei 	= 	rawToProcessed_weighted(data_fil_ga_unwei	,writePaths_dataFrames[i],'_data_filtered_global_average_weighted.pkl')
+#	data_fil_ga_wei 	= 	rawToProcessed_weighted(data_fil_ga_unwei		,writePaths_dataFrames[i],'_data_filtered_global_average_weighted.pkl')
 #	data_fil_ps_unwei = 	rawToProcessed_unweighted(data_fil_ps		,writePaths_dataFrames[i],'_data_filtered_phase_space_unweighted.pkl')
-#	data_fil_ps_wei 	= 	rawToProcessed_weighted(data_fil_ps_unwei	,writePaths_dataFrames[i],'_data_filtered_phase_space_weighted.pkl')
+#	data_fil_ps_wei 	= 	rawToProcessed_weighted(data_fil_ps_unwei		,writePaths_dataFrames[i],'_data_filtered_phase_space_weighted.pkl')
+##
 #
-
 #
 #	data1 = pd.read_pickle(dataFrames_weighted[i])
 #	data2 = pd.read_pickle(dataFrames_ma_filtered[i])

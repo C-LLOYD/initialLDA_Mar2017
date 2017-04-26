@@ -29,6 +29,8 @@ def movingAverageFilter(U,window,data,method,writePaths_figures,VariableName):
 ##	Assume that the windows at the extremes extend to the extremes ..
 	Umeans[0:W]=np.mean(U[0:2*W])
 	Umeans[-W:]=np.mean(U[-2*W:])
+	std[0:W]=np.std(U[0:2*W])
+	std[-W:]=np.std(U[-2*W:])
 	for i in range(W,len(U)-W+1):
 		Umeans[i] = np.mean(U[i-W:i+W])
 		std[i]  = np.std(U[i-W:i+W])
