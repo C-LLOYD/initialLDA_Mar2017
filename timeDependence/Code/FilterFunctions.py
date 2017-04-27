@@ -71,10 +71,10 @@ def Filter(data,filterMethod,averageMethod,window,writePaths_figures,writePath_d
 		else:
 			UxNew 	= UxNew[~Spikes]
 			UyNew 	= UyNew[~Spikes]
-			t	  	= t[~Spikes]
-			resT	  	= resT[~Spikes]
-			s	  	= s[~Spikes]
-#
+			t	= t[~Spikes]
+			resT	= resT[~Spikes]
+			s	= s[~Spikes]
+#			
 ##	Add variables to existing data frame.
 ##	Variables first need to be converted to 'pandas.series'
 	UxNew = pd.Series(UxNew)

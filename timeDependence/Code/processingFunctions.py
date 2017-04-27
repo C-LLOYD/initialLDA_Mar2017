@@ -206,13 +206,15 @@ def rawToProcessed_unweighted (data,writePath_dataFrames,fileAppend):
 ####		Current stats: UxMean, UyMean, uxRMS, uyRMS, uv
 ####
 ###########################################################################################
-def rawToProcessed_weighted (data,writePath_dataFrames,fileAppend):
+def rawToProcessed_weighted (data,averagingTime,writePath_dataFrames,fileAppend):
 #
 ##	Read in data frame and convert required variables to lists: This speeds up looping
 ##	process.
 	resT = data.resTime.as_matrix()
 	Ux = data.Ux.as_matrix()
 	Uy = data.Uy.as_matrix()
+	t = data.timeStamp
+#	t = np.array(data.timeStamp.as_matrix())
 #
 #
 ##	Initialise statistics and loop through the length of the time series.
@@ -230,9 +232,44 @@ def rawToProcessed_weighted (data,writePath_dataFrames,fileAppend):
 		UyMean_w.append(UyMeanNew)
 #
 ##		calculate RMS velocities and Reynolds stresses.
-		uxRMS_w.append(np.divide(sum(np.power((Ux[0:N+1]-UxMeanNew),2)*resT[0:N+1]),sum(resT[0:N+1])))
-		uyRMS_w.append(np.divide(sum(np.power((Uy[0:N+1]-UyMeanNew),2)*resT[0:N+1]),sum(resT[0:N+1])))
+		uxRMS_w.append(np.sqrt(np.divide(sum(np.power((Ux[0:N+1]-UxMeanNew),2)*resT[0:N+1]),sum(resT[0:N+1]))))
+		uyRMS_w.append(np.sqrt(np.divide(sum(np.power((Uy[0:N+1]-UyMeanNew),2)*resT[0:N+1]),sum(resT[0:N+1]))))
 		uv_w.append(np.divide(sum((Ux[0:N+1]-UxMeanNew)*(Uy[0:N+1]-UyMeanNew)*resT[0:N+1]),sum(resT[0:N+1])))
+#
+##	Calculate error associated with only averaging for the averagingTime specified
+##	Capture indicies
+#
+	error_UxMean_w	=	[]
+	error_UyMean_w	=	[]
+	error_uxRMS_w	=	[]
+	error_uyRMS_w	=	[]
+	error_uv_w	=	[]
+#
+	for i in range(int(300-averagingTime)):
+		UxNew = data.Ux.loc[(i < t[:]) & (t[:] < averagingTime + i)].as_matrix()
+		UyNew = data.Uy.loc[(i < t[:]) & (t[:] < averagingTime + i)].as_matrix()
+		resTime = data.resTime.loc[(i < t[:]) & (t[:] < averagingTime + i)].as_matrix()
+		mean_UxNew = 	np.mean(UxNew)
+		mean_UyNew = 	np.mean(UyNew)
+		RMS_ux	=	np.sqrt(np.divide(sum(np.power((UxNew-mean_UxNew),2)*resTime),sum(resTime)))
+		RMS_uy	=	np.sqrt(np.divide(sum(np.power((UyNew-mean_UyNew),2)*resTime),sum(resTime)))
+		uv 	=	np.divide(sum((UxNew-mean_UxNew)*(UyNew-mean_UyNew)*resTime),sum(resTime))
+#
+		error_UxMean_w.append(np.abs(mean_UxNew-UxMean_w[-1]))
+		error_UyMean_w.append(np.abs(mean_UyNew-UyMean_w[-1]))
+		error_uxRMS_w.append(np.abs(RMS_ux-uxRMS_w[-1]))
+		error_uyRMS_w.append(np.abs(RMS_uy-uyRMS_w[-1]))
+		error_uv_w.append(np.abs(uv-uv_w[-1]))
+#
+	print(np.mean(error_UxMean_w)*100/UxMean_w[-1])
+	mpl.plot((error_UxMean_w/UxMean_w[-1]),linestyle=' ',marker='o')
+	mpl.show()
+	error_UxMean_w	=	np.mean(error_UxMean_w)
+	error_UyMean_w	=	np.mean(error_UyMean_w)
+	error_uxRMS_w	=	np.mean(error_uxRMS_w)
+	error_uyRMS_w	=	np.mean(error_uyRMS_w)
+	error_uv_w	=	np.mean(error_uv_w)	
+#
 #
 ##	Add variables to existing data frame.
 ##	Variables first need to be converted to 'pandas.series'
@@ -246,6 +283,11 @@ def rawToProcessed_weighted (data,writePath_dataFrames,fileAppend):
 	data['uxRMS_w']= uxRMS_w
 	data['uyRMS_w']= uyRMS_w
 	data['uv_w']= uv_w
+	data['error_UxMean'] = error_UxMean
+	data['error_UyMean'] = error_UyMean
+	data['error_uxRMS'] = error_uxRMS
+	data['error_uyRMS'] = error_uyRMS
+	data['error_uv'] = error_uv
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
 	data.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+fileAppend)
 	return data;
