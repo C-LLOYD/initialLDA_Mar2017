@@ -262,8 +262,8 @@ def rawToProcessed_weighted (data,averagingTime,writePath_dataFrames,fileAppend)
 		error_uv_w.append(np.abs(uv-uv_w[-1]))
 #
 	print(np.mean(error_UxMean_w)*100/UxMean_w[-1])
-	mpl.plot((error_UxMean_w/UxMean_w[-1]),linestyle=' ',marker='o')
-	mpl.show()
+#	mpl.plot((error_UxMean_w/UxMean_w[-1]),linestyle=' ',marker='o')
+#	mpl.show()
 	error_UxMean_w	=	np.mean(error_UxMean_w)
 	error_UyMean_w	=	np.mean(error_UyMean_w)
 	error_uxRMS_w	=	np.mean(error_uxRMS_w)
@@ -278,16 +278,19 @@ def rawToProcessed_weighted (data,averagingTime,writePath_dataFrames,fileAppend)
 	uxRMS_w = pd.Series(uxRMS_w)
 	uyRMS_w = pd.Series(uyRMS_w)
 	uv_w = pd.Series(uv_w)
-	data['UxMean_w']= UxMean_w
-	data['UyMean_w']= UyMean_w
-	data['uxRMS_w']= uxRMS_w
-	data['uyRMS_w']= uyRMS_w
-	data['uv_w']= uv_w
-	data['error_UxMean'] = error_UxMean
-	data['error_UyMean'] = error_UyMean
-	data['error_uxRMS'] = error_uxRMS
-	data['error_uyRMS'] = error_uyRMS
-	data['error_uv'] = error_uv
+	data['UxMean']= UxMean_w
+	data['UyMean']= UyMean_w
+	data['uxRMS']= uxRMS_w
+	data['uyRMS']= uyRMS_w
+	data['uv']= uv_w
+#
+##	Current code adds the errors to each individual dataframe for each XYZ location.
+##	Separate code will combine these and create a compiled error dataframe.
+	data['error_UxMean'] = error_UxMean_w
+	data['error_UyMean'] = error_UyMean_w
+	data['error_uxRMS'] = error_uxRMS_w
+	data['error_uyRMS'] = error_uyRMS_w
+	data['error_uv'] = error_uv_w
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
 	data.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+fileAppend)
 	return data;
@@ -455,9 +458,9 @@ def plotter(**kargs):
 	return
 
 ###########################################################################################
-####	Function Definition:		Double plotter					  ###########
+####	Function Definition:		Double plotter				###########
 ####
-####		Temporarily two plotters : This one plots two X axis for time and sampleN
+####		Temporarily two plotters : This one plots two X axis for time and sampleNumber
 ####
 ####	This function takes a data frame, currently just consisting of raw data, and plots
 ####	the convergence of the calculated statistics. This will later be adapted to plot 
@@ -609,5 +612,110 @@ def doublePlotter(**kargs):
 #	mpl.show()
 	mpl.close()
 	return
+
+###########################################################################################
+##
+##		Error polynomial
+##
+##		this function reads in three dataFrames (for three z positions) and a write name and creates an
+##		output data frame consisting of 3 coefficients for a polynomial fit.
+##		This is done for each variable: UxMean, UyMean, uxRMS, uyRMS and uv.
+##
+###########################################################################################
+#
+##	Load modules
+import numpy as np
+import pandas as pd
+#
+##	Define function: construct a quadratic out of three points,z, andcorresponding errors,E
+##	This function does work but is not appropriate. Keep it incase required at a later date
+def coeffCalc(z,E):
+	LHS = E[0] - E[1] + (z[0]-z[1])*(E[1]-E[2])/(z[2]-z[1])
+	RHS = z[0]**2 - z[1]**2 - (z[0]-z[1])*(z[2]**2 - z[1]**2)/(z[2]-z[1])
+	C0 = LHS/RHS
+	C1 = (E[0]-E[1]-C0*(z[0]**2-z[1]**2))/(z[0]-z[1])
+	C2 = E[1]-C0*z[1]**2 - C1*z[1]
+#
+	print(E[0],C0*z[0]**2+C1*z[0]+C2)
+	print(E[1],C0*z[1]**2+C1*z[1]+C2)
+	print(E[2],C0*z[2]**2+C1*z[2]+C2)
+#
+	C = [C0,C1,C2]
+	return C
+#
+##	Function:	Currently not useful: It reads in error data and fits a quadratic BUT
+##			really we need more data points. Future work will simply use linear
+##			interpolation.
+def errorPoly(df1,df2,df3,writeName):
+	z = [float(df1.NXYZ[3]),float(df2.NXYZ[3]),float(df3.NXYZ[3])]
+	error_UxMean = [df1.error_UxMean[0]/np.mean(df1.UxMean),df2.error_UxMean[0]/np.mean(df2.UxMean),df3.error_UxMean[0]/np.mean(df3.UxMean)]
+	error_UyMean = [df1.error_UyMean[0]/np.mean(df1.UyMean),df2.error_UyMean[0]/np.mean(df2.UyMean),df3.error_UyMean[0]/np.mean(df3.UyMean)]
+	error_uxRMS = [df1.error_uxRMS[0],df2.error_uxRMS[0],df3.error_uxRMS[0]]
+	error_uyRMS = [df1.error_uyRMS[0],df2.error_uyRMS[0],df3.error_uyRMS[0]]
+	error_uv = [df1.error_uv[0],df2.error_uv[0],df3.error_uv[0]]
+#
+##	Now use coeffCalc to calculate coeffs for each error variable
+	C_UxMean = coeffCalc(z,error_UxMean)
+	C_UyMean = coeffCalc(z,error_UyMean)
+	C_uxRMS = coeffCalc(z,error_uxRMS)
+	C_uyRMS = coeffCalc(z,error_uyRMS)
+	C_uv = coeffCalc(z,error_uv)
+#
+##
+	X = np.linspace(0,100,100)
+	E1 = C_UxMean[0]*X**2 + C_UxMean[1]*X + C_UxMean[2]
+	E2 = C_UyMean[0]*X**2 + C_UyMean[1]*X + C_UyMean[2]
+	E3 = C_uxRMS[0]*X**2 + C_uxRMS[1]*X + C_uxRMS[2]
+	E4 = C_uyRMS[0]*X**2 + C_uyRMS[1]*X + C_uyRMS[2]
+	E5 = C_uv[0]*X**2 + C_uv[1]*X + C_uv[2]
+	mpl.plot(X,E1)
+#	mpl.plot(z,error_UxMean)
+	mpl.show()
+	mpl.plot(X,E2)
+#	mpl.plot(z,error_UyMean)
+	mpl.show()
+	mpl.plot(X,E3)
+	mpl.plot(z,error_uxRMS)
+	mpl.show()
+	mpl.plot(X,E4)
+	mpl.plot(z,error_uyRMS)
+	mpl.show()
+	mpl.plot(X,E5)
+	mpl.plot(z,error_uv)
+	mpl.show()
+##
+##
+#########	New function: errorCompiler
+##		Inputs are a list of data frames and a write name
+##		Function outputs a new dataframe consisting of Z location and errors for each variable.
+##		Write name will consist of pump speed and X location
+def errorCompiler(df_names,write_name):
+#	Need to loop through df_names and append errors and locations
+#	initialise:
+	z,e_UxMean,e_UyMean,e_uxRMS,e_uyRMS,e_uv = [],[],[],[],[],[]
+	for i in range(len(df_names)):
+		data = pd.read_pickle(df_names[i])
+#		print(data)
+		z.append(data.NXYZ[3])
+		e_UxMean.append(data.error_UxMean[0])
+		e_UyMean.append(data.error_UyMean[0])
+		e_uxRMS.append(data.error_uxRMS[0])
+		e_uyRMS.append(data.error_uyRMS[0])
+		e_uv.append(data.error_uv[0])
+#
+##	Now compile into a new dataFrame
+	z = pd.Series(z)
+	e_UxMean = pd.Series(e_UxMean)
+	e_UyMean = pd.Series(e_UyMean)
+	e_uxRMS = pd.Series(e_uxRMS)
+	e_uyRMS = pd.Series(e_uyRMS)
+	e_uv = pd.Series(e_uv)
+#
+	errorData = pd.DataFrame({'z':z,'error_UxMean':e_UxMean,'error_UyMean':e_UyMean,'error_uxRMS':e_uxRMS,'error_uyRMS':e_uyRMS,'error_uv':e_uv})
+	print(errorData)
+#	Now we write this to the location provided
+	return
+
+
 
 ###########################################################################################

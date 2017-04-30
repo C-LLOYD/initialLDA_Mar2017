@@ -29,6 +29,8 @@ from processingFunctions import rawToProcessed_weighted
 from processingFunctions import plotter
 from processingFunctions import doublePlotter
 from FilterFunctions import Filter
+from processingFunctions import errorPoly
+from processingFunctions import errorCompiler
 ##	Currently does not use loops to define file names, since there are only 6.
 fileNames = [
 "../Data/rawData/4hz/Run8_x400_fl_4hz_300secs/Run8_x400_fl_4_hz_300secs.000001.txt",
@@ -116,6 +118,16 @@ plotTimeDep = False
 plotFilDep = False
 axis = [-0.6,0.6]
 
+#	Error testing process:
+#df1 = pd.read_pickle(dataFrames_ma_filtered[0])
+#df2 = pd.read_pickle(dataFrames_ma_filtered[1])
+#df3 = pd.read_pickle(dataFrames_ma_filtered[2])
+
+#errorPoly(df1,df2,df3,'string')
+
+df = dataFrames_ps_filtered[0:3]
+errorCompiler(df,'test')
+
 if plotFilDep == True:
 #
 ##	This loop plots data for filter type dependence - the data set and variables chosen
@@ -139,24 +151,24 @@ if plotFilDep == True:
 
 for i in [0,1,2,3,4,5]:
 	print(fileNames[i])
-	data_raw = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
-	print('Moving Average:')
-	data_fil_ma = Filter(data_raw,'movingAverageFilter','mean',20,writePaths_figures[i],writePaths_dataFrames[i])
-	print('Phase Space:')
-	data_fil_ps = Filter(data_raw,'phaseSpaceFilter','mean',20,writePaths_figures[i],writePaths_dataFrames[i])
-	print('Global Average:')
-	data_fil_ga = Filter(data_raw,'globalAverageFilter','mean',20,writePaths_figures[i],writePaths_dataFrames[i])
+#	data_raw = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
+#	print('Moving Average:')
+#	data_fil_ma = Filter(data_raw,'movingAverageFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
+#	print('Phase Space:')
+#	data_fil_ps = Filter(data_raw,'phaseSpaceFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
+#	print('Global Average:')
+#	data_fil_ga = Filter(data_raw,'globalAverageFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
 #	
 #		
 #
-	data_unwei 		= 	rawToProcessed_unweighted(data_raw		,writePaths_dataFrames[i],'_data_unweighted.pkl')
-	data_wei 		= 	rawToProcessed_weighted(data_unwei,20		,writePaths_dataFrames[i],'_data_weighted.pkl')
-	data_fil_ma_unwei 	= 	rawToProcessed_unweighted(data_fil_ma		,writePaths_dataFrames[i],'_data_filtered_moving_average_unweighted.pkl')
-	data_fil_ma_wei 	= 	rawToProcessed_weighted(data_fil_ma_unwei,20	,writePaths_dataFrames[i],'_data_filtered_moving_average_weighted.pkl')
-	data_fil_ga_unwei 	= 	rawToProcessed_unweighted(data_fil_ga		,writePaths_dataFrames[i],'_data_filtered_global_average_unweighted.pkl')
-	data_fil_ga_wei 	= 	rawToProcessed_weighted(data_fil_ga_unwei,20	,writePaths_dataFrames[i],'_data_filtered_global_average_weighted.pkl')
-	data_fil_ps_unwei 	= 	rawToProcessed_unweighted(data_fil_ps		,writePaths_dataFrames[i],'_data_filtered_phase_space_unweighted.pkl')
-	data_fil_ps_wei 	= 	rawToProcessed_weighted(data_fil_ps_unwei,20	,writePaths_dataFrames[i],'_data_filtered_phase_space_weighted.pkl')
+#	data_unwei 		= 	rawToProcessed_unweighted(data_raw		,writePaths_dataFrames[i],'_data_unweighted.pkl')
+#	data_wei 		= 	rawToProcessed_weighted(data_raw,20		,writePaths_dataFrames[i],'_data_weighted.pkl')
+#	data_fil_ma_unwei 	= 	rawToProcessed_unweighted(data_fil_ma		,writePaths_dataFrames[i],'_data_filtered_moving_average_unweighted.pkl')
+#	data_fil_ma_wei 	= 	rawToProcessed_weighted(data_fil_ma,20		,writePaths_dataFrames[i],'_data_filtered_moving_average_weighted.pkl')
+#	data_fil_ga_unwei 	= 	rawToProcessed_unweighted(data_fil_ga		,writePaths_dataFrames[i],'_data_filtered_global_average_unweighted.pkl')
+#	data_fil_ga_wei 	= 	rawToProcessed_weighted(data_fil_ga,20		,writePaths_dataFrames[i],'_data_filtered_global_average_weighted.pkl')
+#	data_fil_ps_unwei 	= 	rawToProcessed_unweighted(data_fil_ps		,writePaths_dataFrames[i],'_data_filtered_phase_space_unweighted.pkl')
+#	data_fil_ps_wei 	= 	rawToProcessed_weighted(data_fil_ps,20		,writePaths_dataFrames[i],'_data_filtered_phase_space_weighted.pkl')
 ##
 #
 #

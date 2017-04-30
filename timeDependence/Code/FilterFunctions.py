@@ -55,14 +55,16 @@ def Filter(data,filterMethod,averageMethod,window,writePaths_figures,writePath_d
 	else:
 		print('No valid filtering method given ...')
 #
-##	
-	while ~converged:
-		print('Number of spikes = '+str(len(Ux)-len(UxNew))+' = '+str((float(len(Ux))-float(len(UxNew)))/float(len(Ux)/100))+'%')
-		
+##	Run the filter twice but no more than this.
+	N = 0
+	Nmax = 2
+	while N<Nmax:
+		N=N+1
 		XSpikes = Filter(UxNew,window,data,averageMethod,writePaths_figures,'Ux')
 		YSpikes = Filter(UyNew,window,data,averageMethod,writePaths_figures,'Uy')
 #
 		Spikes = XSpikes + YSpikes
+#
 		if len(UxNew) == len(UxNew[~Spikes]):#		test==len(UxNew[~Spikes]):
 			break
 #
@@ -74,6 +76,7 @@ def Filter(data,filterMethod,averageMethod,window,writePaths_figures,writePath_d
 			t	= t[~Spikes]
 			resT	= resT[~Spikes]
 			s	= s[~Spikes]
+			print('Number of spikes = '+str(len(Ux)-len(UxNew))+' = '+str((float(len(Ux))-float(len(UxNew)))/float(len(Ux)/100))+'%')
 #			
 ##	Add variables to existing data frame.
 ##	Variables first need to be converted to 'pandas.series'
