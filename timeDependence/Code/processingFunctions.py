@@ -712,7 +712,9 @@ def errorCompiler(df_names,write_name):
 	e_uv = pd.Series(e_uv)
 #
 	errorData = pd.DataFrame({'z':z,'error_UxMean':e_UxMean,'error_UyMean':e_UyMean,'error_uxRMS':e_uxRMS,'error_uyRMS':e_uyRMS,'error_uv':e_uv})
-	print(errorData)
+#	print(errorData)
+	errorData.to_pickle(write_name)
+#	
 #	Now we write this to the location provided
 	return
 

@@ -114,7 +114,7 @@ def txtToDataFrame (fileName):
 	Ux = pd.Series(Ux)
 	Uy = pd.Series(Uy)
 #
-	if len(s) > 20:
+	if len(s) > 40:
 		data = pd.DataFrame({'NXYZ':NXYZ,'sampleNumber':sampleNumber,
 				'timeStamp':timeStamp,'resTime':resTime,'Ux':Ux,'Uy':Uy})
 		return data;

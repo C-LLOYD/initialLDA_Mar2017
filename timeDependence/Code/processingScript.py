@@ -116,7 +116,7 @@ dataFrames_ps_filtered = [
 #data=pd.read_pickle("../Data/processedData/dataFrames/4hz_x_400_z_1_data_filtered_moving_average_weighted.pkl")
 plotTimeDep = False
 plotFilDep = False
-axis = [-0.6,0.6]
+writeDataFrames = True
 
 #	Error testing process:
 #df1 = pd.read_pickle(dataFrames_ma_filtered[0])
@@ -125,8 +125,7 @@ axis = [-0.6,0.6]
 
 #errorPoly(df1,df2,df3,'string')
 
-df = dataFrames_ps_filtered[0:3]
-errorCompiler(df,'test')
+
 
 if plotFilDep == True:
 #
@@ -149,38 +148,47 @@ if plotFilDep == True:
 	mpl.plot(data_fil_ps.timeStamp,data_fil_ps.Uy,marker='x',linestyle=' ',color = 'k')
 	mpl.show()
 
-for i in [0,1,2,3,4,5]:
-	print(fileNames[i])
-#	data_raw = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
-#	print('Moving Average:')
-#	data_fil_ma = Filter(data_raw,'movingAverageFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
-#	print('Phase Space:')
-#	data_fil_ps = Filter(data_raw,'phaseSpaceFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
-#	print('Global Average:')
-#	data_fil_ga = Filter(data_raw,'globalAverageFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
+if writeDataFrames == True:
+#	for i in [0,1,2,3,4,5]:
+#		print(fileNames[i])
+#		data_raw = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
+#		print('Moving Average:')
+#		data_fil_ma = Filter(data_raw,'movingAverageFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
+#		print('Phase Space:')
+#		data_fil_ps = Filter(data_raw,'phaseSpaceFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
+#		print('Global Average:')
+#		data_fil_ga = Filter(data_raw,'globalAverageFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
 #	
 #		
 #
-#	data_unwei 		= 	rawToProcessed_unweighted(data_raw		,writePaths_dataFrames[i],'_data_unweighted.pkl')
-#	data_wei 		= 	rawToProcessed_weighted(data_raw,20		,writePaths_dataFrames[i],'_data_weighted.pkl')
-#	data_fil_ma_unwei 	= 	rawToProcessed_unweighted(data_fil_ma		,writePaths_dataFrames[i],'_data_filtered_moving_average_unweighted.pkl')
-#	data_fil_ma_wei 	= 	rawToProcessed_weighted(data_fil_ma,20		,writePaths_dataFrames[i],'_data_filtered_moving_average_weighted.pkl')
-#	data_fil_ga_unwei 	= 	rawToProcessed_unweighted(data_fil_ga		,writePaths_dataFrames[i],'_data_filtered_global_average_unweighted.pkl')
-#	data_fil_ga_wei 	= 	rawToProcessed_weighted(data_fil_ga,20		,writePaths_dataFrames[i],'_data_filtered_global_average_weighted.pkl')
-#	data_fil_ps_unwei 	= 	rawToProcessed_unweighted(data_fil_ps		,writePaths_dataFrames[i],'_data_filtered_phase_space_unweighted.pkl')
-#	data_fil_ps_wei 	= 	rawToProcessed_weighted(data_fil_ps,20		,writePaths_dataFrames[i],'_data_filtered_phase_space_weighted.pkl')
+#		data_unwei 		= 	rawToProcessed_unweighted(data_raw		,writePaths_dataFrames[i],'_data_unweighted.pkl')
+#		data_wei 		= 	rawToProcessed_weighted(data_raw,20		,writePaths_dataFrames[i],'_data_weighted.pkl')
+#		data_fil_ma_unwei 	= 	rawToProcessed_unweighted(data_fil_ma		,writePaths_dataFrames[i],'_data_filtered_moving_average_unweighted.pkl')
+#		data_fil_ma_wei 	= 	rawToProcessed_weighted(data_fil_ma,20		,writePaths_dataFrames[i],'_data_filtered_moving_average_weighted.pkl')
+#		data_fil_ga_unwei 	= 	rawToProcessed_unweighted(data_fil_ga		,writePaths_dataFrames[i],'_data_filtered_global_average_unweighted.pkl')
+#		data_fil_ga_wei 	= 	rawToProcessed_weighted(data_fil_ga,20		,writePaths_dataFrames[i],'_data_filtered_global_average_weighted.pkl')
+#		data_fil_ps_unwei 	= 	rawToProcessed_unweighted(data_fil_ps		,writePaths_dataFrames[i],'_data_filtered_phase_space_unweighted.pkl')
+#		data_fil_ps_wei 	= 	rawToProcessed_weighted(data_fil_ps,20		,writePaths_dataFrames[i],'_data_filtered_phase_space_weighted.pkl')
 ##
 #
-#
-#	data1 = pd.read_pickle(dataFrames_weighted[i])
-#	data2 = pd.read_pickle(dataFrames_ma_filtered[i])
-#	data3 = pd.read_pickle(dataFrames_ga_filtered[i])
-#	data4 = pd.read_pickle(dataFrames_ps_filtered[i])
+#	Now write error dataFrames:
+	df_ma_4hz = dataFrames_ma_filtered[0:3]
+	df_ma_8hz = dataFrames_ma_filtered[3:]
+	errorCompiler(df_ma_4hz,'../Data/processedData/dataFrames/4hz_errors.pkl')
+	errorCompiler(df_ma_8hz,'../Data/processedData/dataFrames/8hz_errors.pkl')
 
 ##	Plotting functions:
 #
 ##	Plot mean Ux
-	if plotTimeDep == True:
+if plotTimeDep == True:
+	axis = [-0.6,0.6]
+	for i in [0,1,2,3,4,5]:
+		print(fileNames[i])
+		data1 = pd.read_pickle(dataFrames_weighted[i])
+		data2 = pd.read_pickle(dataFrames_ma_filtered[i])
+		data3 = pd.read_pickle(dataFrames_ga_filtered[i])
+		data4 = pd.read_pickle(dataFrames_ps_filtered[i])
+#
 		doublePlotter(writeString=writePaths_figures[i],	data=data1,	time1=data1.timeStamp,	
 		time2=data1.timeStamp,	time3=data2.timeStamp,	time4=data2.timeStamp,
 		N1=data1.sampleNumber,	
