@@ -149,26 +149,26 @@ if plotFilDep == True:
 	mpl.show()
 
 if writeDataFrames == True:
-#	for i in [0,1,2,3,4,5]:
-#		print(fileNames[i])
-#		data_raw = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
-#		print('Moving Average:')
-#		data_fil_ma = Filter(data_raw,'movingAverageFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
-#		print('Phase Space:')
-#		data_fil_ps = Filter(data_raw,'phaseSpaceFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
-#		print('Global Average:')
-#		data_fil_ga = Filter(data_raw,'globalAverageFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
+	for i in [0,1,2,3,4,5]:
+		print(fileNames[i])
+		data_raw = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
+		print('Moving Average:')
+		data_fil_ma = Filter(data_raw,'movingAverageFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
+		print('Phase Space:')
+		data_fil_ps = Filter(data_raw,'phaseSpaceFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
+		print('Global Average:')
+		data_fil_ga = Filter(data_raw,'globalAverageFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
 #	
 #		
 #
 #		data_unwei 		= 	rawToProcessed_unweighted(data_raw		,writePaths_dataFrames[i],'_data_unweighted.pkl')
-#		data_wei 		= 	rawToProcessed_weighted(data_raw,20		,writePaths_dataFrames[i],'_data_weighted.pkl')
+		data_wei 		= 	rawToProcessed_weighted(data_raw,20		,writePaths_dataFrames[i],'_data_weighted.pkl')
 #		data_fil_ma_unwei 	= 	rawToProcessed_unweighted(data_fil_ma		,writePaths_dataFrames[i],'_data_filtered_moving_average_unweighted.pkl')
-#		data_fil_ma_wei 	= 	rawToProcessed_weighted(data_fil_ma,20		,writePaths_dataFrames[i],'_data_filtered_moving_average_weighted.pkl')
+		data_fil_ma_wei 	= 	rawToProcessed_weighted(data_fil_ma,20		,writePaths_dataFrames[i],'_data_filtered_moving_average_weighted.pkl')
 #		data_fil_ga_unwei 	= 	rawToProcessed_unweighted(data_fil_ga		,writePaths_dataFrames[i],'_data_filtered_global_average_unweighted.pkl')
-#		data_fil_ga_wei 	= 	rawToProcessed_weighted(data_fil_ga,20		,writePaths_dataFrames[i],'_data_filtered_global_average_weighted.pkl')
+		data_fil_ga_wei 	= 	rawToProcessed_weighted(data_fil_ga,20		,writePaths_dataFrames[i],'_data_filtered_global_average_weighted.pkl')
 #		data_fil_ps_unwei 	= 	rawToProcessed_unweighted(data_fil_ps		,writePaths_dataFrames[i],'_data_filtered_phase_space_unweighted.pkl')
-#		data_fil_ps_wei 	= 	rawToProcessed_weighted(data_fil_ps,20		,writePaths_dataFrames[i],'_data_filtered_phase_space_weighted.pkl')
+		data_fil_ps_wei 	= 	rawToProcessed_weighted(data_fil_ps,20		,writePaths_dataFrames[i],'_data_filtered_phase_space_weighted.pkl')
 ##
 #
 #	Now write error dataFrames:
