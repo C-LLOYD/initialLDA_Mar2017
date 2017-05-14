@@ -35,88 +35,100 @@ from FilterFunctions import Filter
 ##	2.	import txt file: Give a hard coded name for now
 writeData = False
 #writeData = True
-rawPath = 	"../Data/rawData/16hz/400mm/*/*.txt"
-errorPath = 	"../Data/processedData/dataFrames/8hz_errors.pkl"
-writePath = 	"../Data/processedData/dataFrames/16hz_400mm_profiles.pkl"
+rawPath = 	["../Data/rawData/4hz/300mm/*/*.txt",
+			"../Data/rawData/4hz/400mm/*/*.txt",
+			"../Data/rawData/8hz/300mm/*/*.txt",
+			"../Data/rawData/8hz/400mm/*/*.txt"]
+#
+errorPath = 	["../Data/processedData/dataFrames/4hz_errors.pkl",
+			"../Data/processedData/dataFrames/4hz_errors.pkl",
+			"../Data/processedData/dataFrames/8hz_errors.pkl",
+			"../Data/processedData/dataFrames/8hz_errors.pkl"]
+#
+writePath = 	["../Data/processedData/dataFrames/4hz_300mm_profiles.pkl",
+			"../Data/processedData/dataFrames/4hz_400mm_profiles.pkl",
+			"../Data/processedData/dataFrames/8hz_300mm_profiles.pkl",
+			"../Data/processedData/dataFrames/8hz_400mm_profiles.pkl"]
 #
 ##
-dataPath = 	"../Data/processedData/dataFrames/16hz_400mm_profiles.pkl"
+dataPath = 	["../Data/processedData/dataFrames/4hz_300mm_profiles.pkl",
+			"../Data/processedData/dataFrames/4hz_400mm_profiles.pkl",
+			"../Data/processedData/dataFrames/8hz_300mm_profiles.pkl",
+			"../Data/processedData/dataFrames/8hz_400mm_profiles.pkl"]
 #
 #
 if writeData == True:
-	data = []
-	for fileName in glob.glob(rawPath):
-		tempData = txtToDataFrame(fileName)
+	for j in range(len(dataPath)):
+		data = []
+		print(rawPath[j])
+		for fileName in glob.glob(rawPath[j]):
+			tempData = txtToDataFrame(fileName)
 #
 ##	3.	filter data
-		if isinstance(tempData,pd.DataFrame):
-			tempData = Filter(tempData,'movingAverageFilter','mean',10,'none','none')
+			if isinstance(tempData,pd.DataFrame):
+				tempData = Filter(tempData,'movingAverageFilter','mean',10,'none','none')
 #
 ##	4.	apply averaging and append a final data series
-			dataNew  = timeAverage(tempData)
-			if not isinstance(data,pd.DataFrame):
-				data = dataNew
-			else:
-				data=data.append(dataNew)
-	data["error_UxMean"] = np.nan
-	data["error_UyMean"] = np.nan
-	data["error_uxRMS"] = np.nan
-	data["error_uyRMS"] = np.nan
-	data["error_uv"] = np.nan
+				dataNew  = timeAverage(tempData)
+				if not isinstance(data,pd.DataFrame):
+					data = dataNew
+				else:
+					data=data.append(dataNew)
+		data["error_UxMean"] = np.nan
+		data["error_UyMean"] = np.nan
+		data["error_uxRMS"] = np.nan
+		data["error_uyRMS"] = np.nan
+		data["error_uv"] = np.nan
 #
 ##	Rearrange and save dataFrame - if wanted
 ##	Rearrange does not work as intended : 1,10,2, ...
-	data = data.sort_values(by='z',ascending=1)
+		data = data.sort_values(by='z',ascending=1)
 #
 ##	Now add columns for the errors, reading from the errorPath
-#	errorData = pd.read_pickle(errorPath)
-
+#
 #
 ##
-	data.to_pickle(writePath)
-	print(data)
-
-#elif writeData == False:
-#	data = pd.read_pickle(dataPath)
-#	data = data.set_index("z")
-#	errorData = pd.read_pickle(errorPath)
-#	errorData = errorData.set_index("z")
-#	exactZ = errorData.index
-#	for i in range(len(exactZ)):
-#		data.set_value(exactZ[i],"error_UxMean", 	errorData.error_UxMean.loc[errorData.index == exactZ[i]])
-#		data.set_value(exactZ[i],"error_UyMean", 	errorData.error_UyMean.loc[errorData.index == exactZ[i]])
-#		data.set_value(exactZ[i],"error_uxRMS",	 	errorData.error_uxRMS.loc[errorData.index == exactZ[i]])
-#		data.set_value(exactZ[i],"error_uyRMS", 	errorData.error_uyRMS.loc[errorData.index == exactZ[i]])
-#		data.set_value(exactZ[i],"error_uv", 		errorData.error_uv.loc[errorData.index == exactZ[i]])
+		data = data.set_index("z")	
+		errorData = pd.read_pickle(errorPath[j])
+		errorData = errorData.set_index("z")
+		exactZ = errorData.index
+		for i in range(len(exactZ)):
+			data.set_value(exactZ[i],"error_UxMean", 	errorData.error_UxMean.loc[errorData.index == exactZ[i]])
+			data.set_value(exactZ[i],"error_UyMean", 	errorData.error_UyMean.loc[errorData.index == exactZ[i]])
+			data.set_value(exactZ[i],"error_uxRMS",	 	errorData.error_uxRMS.loc[errorData.index == exactZ[i]])
+			data.set_value(exactZ[i],"error_uyRMS", 	errorData.error_uyRMS.loc[errorData.index == exactZ[i]])
+			data.set_value(exactZ[i],"error_uv", 		errorData.error_uv.loc[errorData.index == exactZ[i]])
 #
-#	data = data.reset_index(level=0)
-#	errorData = errorData.reset_index(level=0)
-#	data.set_value(0,"error_UxMean", 	errorData.error_UxMean.loc[errorData.z == np.min(errorData.z)])
-#	data.set_value(0,"error_UyMean", 	errorData.error_UyMean.loc[errorData.z == np.min(errorData.z)])
-#	data.set_value(0,"error_uxRMS",	 	errorData.error_uxRMS.loc[errorData.z == np.min(errorData.z)])
-#	data.set_value(0,"error_uyRMS", 	errorData.error_uyRMS.loc[errorData.z == np.min(errorData.z)])
-#	data.set_value(0,"error_uv", 		errorData.error_uv.loc[errorData.z == np.min(errorData.z)])
-#	data = data.set_index("z")
-#	data = data.apply(pd.Series.interpolate)
-#	data = data.reset_index(level=0)
-
+		data = data.reset_index(level=0)
+		errorData = errorData.reset_index(level=0)
+		data.set_value(0,"error_UxMean", 	errorData.error_UxMean.loc[errorData.z == np.min(errorData.z)])
+		data.set_value(0,"error_UyMean", 	errorData.error_UyMean.loc[errorData.z == np.min(errorData.z)])
+		data.set_value(0,"error_uxRMS",	 	errorData.error_uxRMS.loc[errorData.z == np.min(errorData.z)])
+		data.set_value(0,"error_uyRMS", 	errorData.error_uyRMS.loc[errorData.z == np.min(errorData.z)])
+		data.set_value(0,"error_uv", 		errorData.error_uv.loc[errorData.z == np.min(errorData.z)])
+		data = data.set_index("z")
+		data = data.apply(pd.Series.interpolate)
+		data = data.reset_index(level=0)
+#
 #	print(data)
+		data.to_pickle(writePath[j])
 
-#	mpl.semilogx(data.z,data.UxMean,linestyle = 'None', marker = '.')
-#	mpl.errorbar(data.z,data.UxMean,yerr=data.error_UxMean, linestyle = "None")
-#	mpl.show()
-#	mpl.semilogx(data.z,data.UyMean,linestyle = 'None', marker = '.')
-#	mpl.errorbar(data.z,data.UyMean,yerr=data.error_UyMean, linestyle = "None")
-#	mpl.show()
-#	mpl.semilogx(data.z,data.uxRMS,linestyle = 'None', marker = '.')
-#	mpl.errorbar(data.z,data.uxRMS,yerr=data.error_uxRMS, linestyle = "None")
-#	mpl.show()
-#	mpl.semilogx(data.z,data.uyRMS,linestyle = 'None', marker = '.')
-#	mpl.errorbar(data.z,data.uyRMS,yerr=data.error_uyRMS, linestyle = "None")
-#	mpl.show()
-#	mpl.semilogx(data.z,data.uv,linestyle = 'None', marker = '.')
-#	mpl.errorbar(data.z,data.uv,yerr=data.error_uv, linestyle = "None")
-#	mpl.show()
+
+#mpl.semilogx(data.z,data.UxMean,linestyle = 'None', marker = '.')
+#mpl.errorbar(data.z,data.UxMean,yerr=data.error_UxMean, linestyle = "None")
+#mpl.show()
+#mpl.semilogx(data.z,data.UyMean,linestyle = 'None', marker = '.')
+#mpl.errorbar(data.z,data.UyMean,yerr=data.error_UyMean, linestyle = "None")
+#mpl.show()
+#mpl.semilogx(data.z,data.uxRMS,linestyle = 'None', marker = '.')
+#mpl.errorbar(data.z,data.uxRMS,yerr=data.error_uxRMS, linestyle = "None")
+#mpl.show()
+#mpl.semilogx(data.z,data.uyRMS,linestyle = 'None', marker = '.')
+#mpl.errorbar(data.z,data.uyRMS,yerr=data.error_uyRMS, linestyle = "None")
+#mpl.show()
+#mpl.semilogx(data.z,data.uv,linestyle = 'None', marker = '.')
+#mpl.errorbar(data.z,data.uv,yerr=data.error_uv, linestyle = "None")
+#mpl.show()
 #
 #
 ###############	TEMP LOCATION OF LAW OF THE WALL FUNCTION - MOVE THIS LATER ################
@@ -128,7 +140,7 @@ def linearReg(X,Y):
 	alpha = np.mean(X) - beta*np.mean(Y)
 	return [alpha,beta]
 
-data = pd.read_pickle(dataPath)
+data = pd.read_pickle(dataPath[0])
 Ulab = data.UxMean.as_matrix()
 Ylab = data.z.as_matrix()/1000
 nu = 1.1*10**(-6)
@@ -142,7 +154,7 @@ counter = 0
 while counter < 5:
 	counter = counter + 1
 #	print(counter)
-	print(Ylam,Ulam)
+#	print(Ylam,Ulam)
 	[aLam,bLam] = linearReg(Ulam,Ylam)
 #	Delta = aLam/bLam
 	Utau1 = np.sqrt(bLam*nu)
@@ -158,27 +170,32 @@ while counter < 5:
 	Utau2 = bTurb*kappa
 	Yplus = Ylab*Utau2/nu
 	Ylam = Ylab[(Yplus<=5)]
-	print(len(Ylam))
+#	print(len(Ylam))
 	Ulam = Ulab[(Yplus<=5)]
 	if len(Ylam) < 2:
 		Ylam = Ylam[0:3]
 		Ulam = Ulam[0:3]
-	print(Utau1,Utau2)
+#	print(Utau1,Utau2)
 
 Yplus = (Ylab + Delta)*Utau1/nu
 Uplus = Ulab/Utau1
 
 lamlawUplus = Yplus
-loglawUplus = np.log(Yplus)/kappa + Cplus 
+loglawUplus = np.log(Yplus)/kappa + Cplus + (Utau1/kappa)*np.log(Utau1/nu)
 
 mpl.semilogx(Yplus,Uplus,linestyle=' ',marker = '.')
 mpl.semilogx(Yplus,lamlawUplus)
 mpl.semilogx(Yplus,loglawUplus)
 mpl.axis([0,np.max(Yplus),0,np.max(Uplus)+0.05*np.max(Uplus)])
-#mpl.show()
+mpl.show()
 mpl.close()
-	
-	
+
+mpl.plot(Uplus,Yplus,linestyle=' ',marker= '.')
+mpl.plot(lamlawUplus,Yplus)
+mpl.plot(loglawUplus,Yplus)	
+mpl.axis([0,30,0,100])
+mpl.show()
+mpl.close()	
 
 #
 ##
