@@ -346,6 +346,105 @@ def plotter(**kargs):
 
 ###########################################################################################
 ##############
-##############		WRITEPROFILES				
-####
-####			This function takes a 
+##############		findDimensionlessParameters
+#
+#
+#			Reads in Ylab and Ulab and estimates the wall offset, Delta, and the 
+#			friction velocity, Utau. This function assumes the kinematic viscosity
+#			is known.
+#
+##############
+##
+##	Define function to apply linear regression to two input variables
+def linearReg(X,Y):
+#
+##	Variables are assumed to be in the form:
+##				X = beta Y + alpha
+	beta = np.sum( (X-np.mean(X)) * (Y-np.mean(Y)) ) / np.sum( (Y - np.mean(Y))**2 ) 
+	alpha = np.mean(X) - beta*np.mean(Y)
+	rSqrd = np.sum((X - alpha - beta*Y)**2)
+	return [alpha,beta,rSqrd]
+
+#
+def findDimensionlessParameters(U,Ylab):
+	nu = 1.1*10**(-6)
+	kappa = 0.41
+#
+##	1.	find Delta using laminar sub layer
+##	Assume laminar sub layer is represented by first 5 points - this is checked later
+	UlamLab = U[0:10]
+	YlamLab = Ylab[0:10]
+	[alpha,beta,rSqrd] = linearReg(UlamLab,YlamLab)
+	print('Rsquared(lam) = ',rSqrd)
+	Delta = -alpha/beta
+#
+##	Now offset original data
+	Y = Ylab - Delta
+#
+##	Get an estimate of UTau, yPlus and log-layer region,using lam layer
+	UtauEst = 	np.sqrt(beta*nu)
+	YplusEst = Y*UtauEst/nu
+#	mpl.plot(YplusEst[0:10],(U/UtauEst)[0:10])
+#	mpl.show()
+	YturbEst = Y[-50:]
+	UturbEst = U[-50:]
+	Estimate = True
+#
+###########
+###########		Now set up loop for convergence - assume conv after 5 iterations
+	counter = 0
+	while counter < 20:
+		counter = counter+1
+		if Estimate == True:
+			Yturb = YturbEst
+			Uturb = UturbEst
+			Estimate = False
+#
+		[alpha,beta,rSqrd] = linearReg(Uturb,np.log(Yturb))
+#		print('Rsquared(turb) = ',rSqrd)
+		Utau = beta*kappa
+#
+##		Now re-evaluate Yplus and Uplus
+		Yplus = Y*Utau/nu
+#
+##		Update laminar layer and find new delta
+		UlamLab = U[Yplus < 5]
+		YlamLab = Ylab[Yplus < 5]
+		[alpha2,beta2,rSqrd2] = linearReg(UlamLab,YlamLab)
+#		print('Rsquared(lam) = ',rSqrd2)
+		Delta = -alpha2/beta2
+#		print(alpha2)
+#
+##		Now offset original data with new delta
+		Y = Ylab - Delta
+		Yplus = Y*Utau/nu
+		Yturb = Y[(30<=Yplus) & (Yplus<=200)]
+		Uturb = U[(30<=Yplus) & (Yplus<=200)]
+		#print('Utau = ',Utau,np.sqrt(beta2*nu))
+		Utau2=np.sqrt(beta2*nu)
+#		error = 0.41*(alpha-5.2*Utau)-Utau*np.log(Utau/nu)
+#		print(error)
+
+	mpl.semilogx(YlamLab,UlamLab,linestyle = 'None', marker = '.')
+	mpl.semilogx(Yturb,Uturb,linestyle = 'None', marker = '.')
+	mpl.plot(Y,Y*beta2+alpha2)
+	mpl.plot(Y,beta*np.log(Y)+alpha)
+	mpl.axis([0,np.max(Y),0,np.max(Uturb)+0.05*np.max(Uturb)])
+#	mpl.show()
+#	mpl.semilogx(Yplus,U/Utau,linestyle = 'None', marker = '.')
+#	mpl.plot(Yplus,Yplus)
+#	mpl.plot(Yplus,np.log(Yplus)/kappa+5.2)
+#	mpl.axis([0,np.max(Yplus),0,np.max(U/Utau)+0.05*np.max(U/Utau)])
+#	mpl.show()
+	return [Utau2,Delta]
+#
+##	Now fit a linearRegression model to log-layer
+	
+
+
+
+
+
+
+
+
