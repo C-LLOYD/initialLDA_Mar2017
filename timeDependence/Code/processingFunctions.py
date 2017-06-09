@@ -402,7 +402,7 @@ def plotter(**kargs):
 		if legend == None:
 			pass
 		else:
-			mpl.legend(handles=[plot1, plot2, plot3, plot4])
+			mpl.legend(handles=[plot1, plot2, plot3, plot4]),
 #
 ##	Set up convergence criteria
 ##	If None is given, provide a converged criteria but don't plot it
@@ -717,6 +717,44 @@ def errorCompiler(df_names,write_name):
 #	
 #	Now we write this to the location provided
 	return
+
+def simplePlotter(**kargs):
+	u1 = kargs['u1'];	u2 = kargs['u2'];	u3 = kargs['u3'];	u4 = kargs['u4'];	u5 = kargs['u5'];	u6 = kargs['u6'];
+	v1 = kargs['v1'];	v2 = kargs['v2'];	v3 = kargs['v3'];	v4 = kargs['v4'];	v5 = kargs['v5'];	v6 = kargs['v6'];
+	u1Lab = kargs['u1Lab'];	u2Lab = kargs['u2Lab'];	u3Lab = kargs['u3Lab'];	u4Lab = kargs['u4Lab'];	u5Lab = kargs['u5Lab'];	u6Lab = kargs['u6Lab'];
+	ylabel = kargs['ylabel'];	xlabel = kargs['xlabel'];
+	legend = kargs['legend'];
+	writeString=kargs['writeString'];
+#
+	mpl.rc('font', **{'family': 'serif', 'serif': ['Computer Modern'], 'size':'20'})
+	mpl.rc('text', usetex=True)
+	fig = mpl.figure()
+	ax1 = fig.add_subplot(1,1,1)
+	plot1, = ax1.plot(v1,u1,color='k',linestyle='-',linewidth='2',label=u1Lab)
+	if isinstance(u2,pd.Series): 
+		plot2, = ax1.plot(v2,u2,color='k',linestyle='--',linewidth='3',label=u2Lab)
+	if isinstance(u3,pd.Series): 
+		plot3, = ax1.plot(v3,u3,color='k',linestyle='-.',linewidth='3',label=u3Lab)
+	if isinstance(u4,pd.Series): 
+		plot4, = ax1.plot(v4,u4,color='r',linestyle='-',linewidth='2',label=u4Lab)
+	if isinstance(u5,pd.Series):
+		plot5, = ax1.plot(v5,u5,color='r',linestyle='--',linewidth='3',label=u5Lab)
+	if isinstance(u6,pd.Series): 
+		plot6, = ax1.plot(v6,u6,color='r',linestyle='-.',linewidth='3',label=u6Lab)
+	ax1.set_xlabel(xlabel,fontsize='30')
+	ax1.set_ylabel(ylabel,fontsize='35',rotation=0,labelpad=45)
+#	h.set_rotation(0)
+	if legend == True:
+		mpl.legend(handles=[plot1, plot3, plot4, plot6],loc=1,prop={'size':18},ncol=1)
+#
+	mpl.axis([0, np.max(v6),0.7, 1.3])
+	mpl.minorticks_on()
+	mpl.grid(True, which='minor',alpha=0.6)
+	mpl.grid(True, which='major',linewidth=0.9)
+	writePath = writeString
+	mpl.savefig(writePath)
+#	mpl.show()
+	mpl.close()
 
 
 

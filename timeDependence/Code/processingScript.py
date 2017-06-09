@@ -26,7 +26,7 @@ import pandas as pd
 from processingFunctions import txtToDataFrame
 from processingFunctions import rawToProcessed_unweighted
 from processingFunctions import rawToProcessed_weighted
-from processingFunctions import plotter
+from processingFunctions import simplePlotter
 from processingFunctions import doublePlotter
 from FilterFunctions import Filter
 from processingFunctions import errorPoly
@@ -116,7 +116,8 @@ dataFrames_ps_filtered = [
 #data=pd.read_pickle("../Data/processedData/dataFrames/4hz_x_400_z_1_data_filtered_moving_average_weighted.pkl")
 plotTimeDep = False
 plotFilDep = False
-writeDataFrames = True
+writeDataFrames = False
+plotSimpleTimeDep = True
 
 #	Error testing process:
 #df1 = pd.read_pickle(dataFrames_ma_filtered[0])
@@ -241,6 +242,177 @@ if plotTimeDep == True:
 		U1label='Raw',	U2label='Raw, Weighted',	U3label='Filtered', U4label='Filtered, Weighted',
 		writeName='uv.png',legend=None)
 #
+if plotSimpleTimeDep == True:
+#	for i in [0,1,2,3,4,5]:
+#
+#	print(fileNames[i])
+	data_4_1 = pd.read_pickle(dataFrames_ma_filtered[0])
+	data_4_15 = pd.read_pickle(dataFrames_ma_filtered[1])
+	data_4_40 = pd.read_pickle(dataFrames_ma_filtered[2])
+	data_8_1 = pd.read_pickle(dataFrames_ma_filtered[3])
+	data_8_15 = pd.read_pickle(dataFrames_ma_filtered[4])
+	data_8_40 = pd.read_pickle(dataFrames_ma_filtered[5])
+#		print(data)
+#
+##	Plot Ux
+	simplePlotter(
+	v1 = data_4_1.timeStamp,	v2 = data_4_15.timeStamp,	v3 = data_4_40.timeStamp,
+	v4 = data_8_1.timeStamp,	v5 = data_8_15.timeStamp,	v6 = data_8_40.timeStamp,
+	u1 = data_4_1.UxMean/np.mean(data_4_1.UxMean.loc[data_4_1.timeStamp[:]>270]),
+#	u2 = data_4_15.UxMean/np.mean(data_4_15.UxMean.loc[data_4_15.timeStamp[:]>270]),
+	u3 = data_4_40.UxMean/np.mean(data_4_40.UxMean.loc[data_4_40.timeStamp[:]>270]),
+	u4 = data_8_1.UxMean/np.mean(data_8_1.UxMean.loc[data_8_1.timeStamp[:]>270]),
+#	u5 = data_8_15.UxMean/np.mean(data_8_15.UxMean.loc[data_8_15.timeStamp[:]>270]),
+	u6 = data_8_40.UxMean/np.mean(data_8_40.UxMean.loc[data_8_40.timeStamp[:]>270]),
+	u2 = [],u5 = [],
+	u1Lab = '4 Hz, y = 1 mm',	u2Lab = '4 Hz, y = 15 mm',	u3Lab = '4 Hz, y = 40 mm',
+	u4Lab = '8 Hz, y = 1 mm',	u5Lab = '8 Hz, y = 15 mm',	u6Lab = '8 Hz, y = 40 mm',
+	ylabel = r'$\frac{\mu_u(t)}{\mu_{u}(300)}$',	xlabel = r'$t$ (s)',	legend = True,
+	writeString = "../Data/processedData/figures/UxMeanTConvergence.png")
+#
+	simplePlotter(
+	v1 = data_4_1.sampleNumber,	v2 = data_4_15.sampleNumber,	v3 = data_4_40.sampleNumber,
+	v4 = data_8_1.sampleNumber,	v5 = data_8_15.sampleNumber,	v6 = data_8_40.sampleNumber,
+	u1 = data_4_1.UxMean/np.mean(data_4_1.UxMean.loc[data_4_1.timeStamp[:]>270]),
+#	u2 = data_4_15.UxMean/np.mean(data_4_15.UxMean.loc[data_4_15.timeStamp[:]>270]),
+	u3 = data_4_40.UxMean/np.mean(data_4_40.UxMean.loc[data_4_40.timeStamp[:]>270]),
+	u4 = data_8_1.UxMean/np.mean(data_8_1.UxMean.loc[data_8_1.timeStamp[:]>270]),
+#	u5 = data_8_15.UxMean/np.mean(data_8_15.UxMean.loc[data_8_15.timeStamp[:]>270]),
+	u6 = data_8_40.UxMean/np.mean(data_8_40.UxMean.loc[data_8_40.timeStamp[:]>270]),
+	u2 = [],u5 = [],
+	u1Lab = '4 Hz, y = 1 mm',	u2Lab = '4 Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
+	u4Lab = '8 Hz, y = 1 mm',	u5Lab = '8 Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
+	ylabel = r'$\frac{\mu_u(t)}{\mu_{u}(300)}$',	xlabel = r'$N$',	legend = False,
+	writeString = "../Data/processedData/figures/UxMeanNConvergence.png")
+#
+#
+##	Plot Uy
+	simplePlotter(
+	v1 = data_4_1.timeStamp,	v2 = data_4_15.timeStamp,	v3 = data_4_40.timeStamp,
+	v4 = data_8_1.timeStamp,	v5 = data_8_15.timeStamp,	v6 = data_8_40.timeStamp,
+	u1 = data_4_1.UyMean/np.mean(data_4_1.UyMean.loc[data_4_1.timeStamp[:]>270]),
+#	u2 = data_4_15.UyMean/np.mean(data_4_15.UyMean.loc[data_4_15.timeStamp[:]>270]),
+	u3 = data_4_40.UyMean/np.mean(data_4_40.UyMean.loc[data_4_40.timeStamp[:]>270]),
+	u4 = data_8_1.UyMean/np.mean(data_8_1.UyMean.loc[data_8_1.timeStamp[:]>270]),
+#	u5 = data_8_15.UyMean/np.mean(data_8_15.UyMean.loc[data_8_15.timeStamp[:]>270]),
+	u6 = data_8_40.UyMean/np.mean(data_8_40.UyMean.loc[data_8_40.timeStamp[:]>270]),
+	u2 = [],u5 = [],
+	u1Lab = '4Hz, y = 1mm',	u2Lab = '4Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
+	u4Lab = '8Hz, y = 1mm',	u5Lab = '8Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
+	ylabel = r'$\frac{\mu_v(t)}{\mu_{v}(300)}$',	xlabel = r'$t$ (s)',	legend = False,
+	writeString = "../Data/processedData/figures/UyMeanTConvergence.png")
+#
+	simplePlotter(
+	v1 = data_4_1.sampleNumber,	v2 = data_4_15.sampleNumber,	v3 = data_4_40.sampleNumber,
+	v4 = data_8_1.sampleNumber,	v5 = data_8_15.sampleNumber,	v6 = data_8_40.sampleNumber,
+	u1 = data_4_1.UyMean/np.mean(data_4_1.UyMean.loc[data_4_1.timeStamp[:]>270]),
+#	u2 = data_4_15.UyMean/np.mean(data_4_15.UyMean.loc[data_4_15.timeStamp[:]>270]),
+	u3 = data_4_40.UyMean/np.mean(data_4_40.UyMean.loc[data_4_40.timeStamp[:]>270]),
+	u4 = data_8_1.UyMean/np.mean(data_8_1.UyMean.loc[data_8_1.timeStamp[:]>270]),
+#	u5 = data_8_15.UyMean/np.mean(data_8_15.UyMean.loc[data_8_15.timeStamp[:]>270]),
+	u6 = data_8_40.UyMean/np.mean(data_8_40.UyMean.loc[data_8_40.timeStamp[:]>270]),
+	u2 = [],u5 = [],
+	u1Lab = '4Hz, y = 1mm',	u2Lab = '4Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
+	u4Lab = '8Hz, y = 1mm',	u5Lab = '8Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
+	ylabel = r'$\frac{\mu_v(t)}{\mu_{v}(300)}$',	xlabel = r'$N$',	legend = False,
+	writeString = "../Data/processedData/figures/UyMeanNConvergence.png")
+#
+#
+##	Plot Uxrms
+	simplePlotter(
+	v1 = data_4_1.timeStamp,	v2 = data_4_15.timeStamp,	v3 = data_4_40.timeStamp,
+	v4 = data_8_1.timeStamp,	v5 = data_8_15.timeStamp,	v6 = data_8_40.timeStamp,
+	u1 = data_4_1.uxRMS/np.mean(data_4_1.uxRMS.loc[data_4_1.timeStamp[:]>270]),
+#	u2 = data_4_15.uxRMS/np.mean(data_4_15.uxRMS.loc[data_4_15.timeStamp[:]>270]),
+	u3 = data_4_40.uxRMS/np.mean(data_4_40.uxRMS.loc[data_4_40.timeStamp[:]>270]),
+	u4 = data_8_1.uxRMS/np.mean(data_8_1.uxRMS.loc[data_8_1.timeStamp[:]>270]),
+#	u5 = data_8_15.uxRMS/np.mean(data_8_15.uxRMS.loc[data_8_15.timeStamp[:]>270]),
+	u6 = data_8_40.uxRMS/np.mean(data_8_40.uxRMS.loc[data_8_40.timeStamp[:]>270]),
+	u2 = [],u5 = [],
+	u1Lab = '4Hz, y = 1mm',	u2Lab = '4Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
+	u4Lab = '8Hz, y = 1mm',	u5Lab = '8Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
+	ylabel = r'$\frac{\sigma_u(t)}{\sigma_{u}(300)}$',	xlabel = r'$t$ (s)',	legend = False,
+	writeString = "../Data/processedData/figures/uxRMSTConvergence.png")
+#
+	simplePlotter(
+	v1 = data_4_1.sampleNumber,	v2 = data_4_15.sampleNumber,	v3 = data_4_40.sampleNumber,
+	v4 = data_8_1.sampleNumber,	v5 = data_8_15.sampleNumber,	v6 = data_8_40.sampleNumber,
+	u1 = data_4_1.uxRMS/np.mean(data_4_1.uxRMS.loc[data_4_1.timeStamp[:]>270]),
+#	u2 = data_4_15.uxRMS/np.mean(data_4_15.uxRMS.loc[data_4_15.timeStamp[:]>270]),
+	u3 = data_4_40.uxRMS/np.mean(data_4_40.uxRMS.loc[data_4_40.timeStamp[:]>270]),
+	u4 = data_8_1.uxRMS/np.mean(data_8_1.uxRMS.loc[data_8_1.timeStamp[:]>270]),
+#	u5 = data_8_15.uxRMS/np.mean(data_8_15.uxRMS.loc[data_8_15.timeStamp[:]>270]),
+	u6 = data_8_40.uxRMS/np.mean(data_8_40.uxRMS.loc[data_8_40.timeStamp[:]>270]),
+	u2 = [],u5 = [],
+	u1Lab = '4Hz, y = 1mm',	u2Lab = '4Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
+	u4Lab = '8Hz, y = 1mm',	u5Lab = '8Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
+	ylabel = r'$\frac{\sigma_u(t)}{\sigma_{u}(300)}$',	xlabel = r'$N$',	legend = False,
+	writeString = "../Data/processedData/figures/uxRMSNConvergence.png")
+#
+#
+##	Plot uyRMS
+	simplePlotter(
+	v1 = data_4_1.timeStamp,	v2 = data_4_15.timeStamp,	v3 = data_4_40.timeStamp,
+	v4 = data_8_1.timeStamp,	v5 = data_8_15.timeStamp,	v6 = data_8_40.timeStamp,
+	u1 = data_4_1.uyRMS/np.mean(data_4_1.uyRMS.loc[data_4_1.timeStamp[:]>270]),
+#	u2 = data_4_15.uyRMS/np.mean(data_4_15.uyRMS.loc[data_4_15.timeStamp[:]>270]),
+	u3 = data_4_40.uyRMS/np.mean(data_4_40.uyRMS.loc[data_4_40.timeStamp[:]>270]),
+	u4 = data_8_1.uyRMS/np.mean(data_8_1.uyRMS.loc[data_8_1.timeStamp[:]>270]),
+#	u5 = data_8_15.uyRMS/np.mean(data_8_15.uyRMS.loc[data_8_15.timeStamp[:]>270]),
+	u6 = data_8_40.uyRMS/np.mean(data_8_40.uyRMS.loc[data_8_40.timeStamp[:]>270]),
+	u2 = [],u5 = [],
+	u1Lab = '4Hz, y = 1mm',	u2Lab = '4Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
+	u4Lab = '8Hz, y = 1mm',	u5Lab = '8Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
+	ylabel = r'$\frac{\sigma_v(t)}{\sigma_{v}(300)}$',	xlabel = r'$t$ (s)',	legend = False,
+	writeString = "../Data/processedData/figures/uyRMSTConvergence.png")
+#
+	simplePlotter(
+	v1 = data_4_1.sampleNumber,	v2 = data_4_15.sampleNumber,	v3 = data_4_40.sampleNumber,
+	v4 = data_8_1.sampleNumber,	v5 = data_8_15.sampleNumber,	v6 = data_8_40.sampleNumber,
+	u1 = data_4_1.uyRMS/np.mean(data_4_1.uyRMS.loc[data_4_1.timeStamp[:]>270]),
+#	u2 = data_4_15.uyRMS/np.mean(data_4_15.uyRMS.loc[data_4_15.timeStamp[:]>270]),
+	u3 = data_4_40.uyRMS/np.mean(data_4_40.uyRMS.loc[data_4_40.timeStamp[:]>270]),
+	u4 = data_8_1.uyRMS/np.mean(data_8_1.uyRMS.loc[data_8_1.timeStamp[:]>270]),
+#	u5 = data_8_15.uyRMS/np.mean(data_8_15.uyRMS.loc[data_8_15.timeStamp[:]>270]),
+	u6 = data_8_40.uyRMS/np.mean(data_8_40.uyRMS.loc[data_8_40.timeStamp[:]>270]),
+	u2 = [],u5 = [],
+	u1Lab = '4Hz, y = 1mm',	u2Lab = '4Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
+	u4Lab = '8Hz, y = 1mm',	u5Lab = '8Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
+	ylabel = r'$\frac{\sigma_v(t)}{\sigma_{v}(300)}$',	xlabel = r'$N$',	legend = False,
+	writeString = "../Data/processedData/figures/uyRMSNConvergence.png")
+#
+##	Plot uv
+	simplePlotter(
+	v1 = data_4_1.timeStamp,	v2 = data_4_15.timeStamp,	v3 = data_4_40.timeStamp,
+	v4 = data_8_1.timeStamp,	v5 = data_8_15.timeStamp,	v6 = data_8_40.timeStamp,
+	u1 = data_4_1.uv/np.mean(data_4_1.uv.loc[data_4_1.timeStamp[:]>270]),
+#	u2 = data_4_15.uv/np.mean(data_4_15.uv.loc[data_4_15.timeStamp[:]>270]),
+	u3 = data_4_40.uv/np.mean(data_4_40.uv.loc[data_4_40.timeStamp[:]>270]),
+	u4 = data_8_1.uv/np.mean(data_8_1.uv.loc[data_8_1.timeStamp[:]>270]),
+#	u5 = data_8_15.uv/np.mean(data_8_15.uv.loc[data_8_15.timeStamp[:]>270]),
+	u6 = data_8_40.uv/np.mean(data_8_40.uv.loc[data_8_40.timeStamp[:]>270]),
+	u2 = [],u5 = [],
+	u1Lab = '4Hz, y = 1mm',	u2Lab = '4Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
+	u4Lab = '8Hz, y = 1mm',	u5Lab = '8Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
+	ylabel = r'$\frac{\gamma_{u,v}(t)}{\gamma_{u,v}(300)}$',	xlabel = r'$t$ (s)',	legend = False,
+	writeString = "../Data/processedData/figures/uvTConvergence.png")
+#
+	simplePlotter(
+	v1 = data_4_1.sampleNumber,	v2 = data_4_15.sampleNumber,	v3 = data_4_40.sampleNumber,
+	v4 = data_8_1.sampleNumber,	v5 = data_8_15.sampleNumber,	v6 = data_8_40.sampleNumber,
+	u1 = data_4_1.uv/np.mean(data_4_1.uv.loc[data_4_1.timeStamp[:]>270]),
+#	u2 = data_4_15.uv/np.mean(data_4_15.uv.loc[data_4_15.timeStamp[:]>270]),
+	u3 = data_4_40.uv/np.mean(data_4_40.uv.loc[data_4_40.timeStamp[:]>270]),
+	u4 = data_8_1.uv/np.mean(data_8_1.uv.loc[data_8_1.timeStamp[:]>270]),
+#	u5 = data_8_15.uv/np.mean(data_8_15.uv.loc[data_8_15.timeStamp[:]>270]),
+	u6 = data_8_40.uv/np.mean(data_8_40.uv.loc[data_8_40.timeStamp[:]>270]),
+	u2 = [],u5 = [],
+	u1Lab = '4Hz, y = 1mm',	u2Lab = '4Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
+	u4Lab = '8Hz, y = 1mm',	u5Lab = '8Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
+	ylabel = r'$\frac{\gamma_{u,v}(t)}{\gamma_{u,v}(300)}$',	xlabel = r'$N$',	legend = False,
+	writeString = "../Data/processedData/figures/uvNConvergence.png")
+#
+
 
 
 #######################################################################################

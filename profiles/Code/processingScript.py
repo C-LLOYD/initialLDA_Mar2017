@@ -121,8 +121,8 @@ if writeData == True:
 data = (pd.read_pickle(dataPath[0]),pd.read_pickle(dataPath[2]))
 pumpSpeed = ['4hz','8hz']
 
-for d in range(len(data)):
-	if plotDimensionedData == True:
+if plotDimensionedData == True:
+	for d in range(len(data)):
 		print(pumpSpeed[d])
 		mpl.semilogx(data[d].z,data[d].UxMean,linestyle = 'None', marker = '.')
 		mpl.errorbar(data[d].z,data[d].UxMean,yerr=data[d].error_UxMean, linestyle = "None")
@@ -187,6 +187,8 @@ for d in range(len(data)):
 
 
 def linearReg(X,Y):
+#
+##	Equation: X = beta*Y + alpha
 	beta = np.sum( (X-np.mean(X)) * (Y-np.mean(Y)) ) / np.sum( (Y - np.mean(Y))**2 ) 
 	alpha = np.mean(X) - beta*np.mean(Y)
 	return [alpha,beta]
