@@ -745,7 +745,7 @@ def simplePlotter(**kargs):
 	ax1.set_ylabel(ylabel,fontsize='35',rotation=0,labelpad=45)
 #	h.set_rotation(0)
 	if legend == True:
-		mpl.legend(handles=[plot1, plot3, plot4, plot6],loc=1,prop={'size':18},ncol=1)
+		mpl.legend(handles=[plot1, plot3, plot4, plot6],loc=4,prop={'size':18},ncol=1)
 #
 	mpl.axis([0, np.max(v6),0.7, 1.3])
 	mpl.minorticks_on()

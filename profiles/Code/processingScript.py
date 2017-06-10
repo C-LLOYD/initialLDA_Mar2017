@@ -118,67 +118,115 @@ if writeData == True:
 #	print(data)
 		data.to_pickle(writePath[j])
 
-data = (pd.read_pickle(dataPath[0]),pd.read_pickle(dataPath[2]))
+data = (pd.read_pickle(dataPath[0]),pd.read_pickle(dataPath[1]),pd.read_pickle(dataPath[2]),pd.read_pickle(dataPath[3]))
+data1=data[0];	data2=data[1];	data3=data[2];	data4=data[3];
 pumpSpeed = ['4hz','8hz']
 
 if plotDimensionedData == True:
-	for d in range(len(data)):
-		print(pumpSpeed[d])
-		mpl.semilogx(data[d].z,data[d].UxMean,linestyle = 'None', marker = '.')
-		mpl.errorbar(data[d].z,data[d].UxMean,yerr=data[d].error_UxMean, linestyle = "None")
+	for i in range(len(pumpSpeed)):
+		if i == 0:
+			d1 = data1;	d2 = data2;
+		elif i == 1:
+			d1 = data3; d2 = data4;
+#
+##	Plot mean U
 		mpl.rc('text', usetex=True)
 		mpl.rc('font', family='serif')
-		mpl.xticks(fontsize=25)
-		mpl.yticks(fontsize=25)
-		mpl.xlabel(r'$\mathbf{z}$',fontsize=30)
-		mpl.ylabel(r'$\mathbf{U}$',fontsize=30)
-		write = '../Data/processedData/figures/meanU_'+str(pumpSpeed[d])+'.png'
-		mpl.savefig(write)
-	#	mpl.show()
-		mpl.close()
-		#mpl.semilogx(data.z,data.UyMean,linestyle = 'None', marker = '.')
-		#mpl.errorbar(data.z,data.UyMean,yerr=data.error_UyMean, linestyle = "None")
-		#mpl.show()
-		#mpl.close()
-		mpl.plot(data[d].z,data[d].uxRMS,linestyle = 'None', marker = '.')
-		mpl.errorbar(data[d].z,data[d].uxRMS,yerr=data[d].error_uxRMS, linestyle = "None")
-		mpl.rc('text', usetex=True)
-		mpl.rc('font', family='serif')
-		mpl.xticks(fontsize=25)
-		mpl.yticks(fontsize=25)
-		mpl.xlabel(r'$\mathbf{z}$',fontsize=30)
-		mpl.ylabel(r'$\mathbf{RMS(U)}$',fontsize=30)
-		write = '../Data/processedData/figures/rmsU_'+str(pumpSpeed[d])+'.png'
-		mpl.savefig(write)
-	#	mpl.show()
-		mpl.close()
-		mpl.plot(data[d].z,data[d].uyRMS,linestyle = 'None', marker = '.')
-		mpl.errorbar(data[d].z,data[d].uyRMS,yerr=data[d].error_uyRMS, linestyle = "None")
-		mpl.rc('text', usetex=True)
-		mpl.rc('font', family='serif')
-		mpl.xticks(fontsize=25)
-		mpl.yticks(fontsize=25)
-		mpl.xlabel(r'$\mathbf{z}$',fontsize=30)
-		mpl.ylabel(r'$\mathbf{RMS(W)}$',fontsize=30)
-		write = '../Data/processedData/figures/rmsW_'+str(pumpSpeed[d])+'.png'
-		mpl.savefig(write)
-	#	mpl.show()
-		mpl.close()
-		mpl.plot(data[d].z,data[d].uv,linestyle = 'None', marker = '.')
-		mpl.errorbar(data[d].z,data[d].uv,yerr=data[d].error_uv, linestyle = "None")
-		mpl.rc('text', usetex=True)
-		mpl.rc('font', family='serif')
-		mpl.xticks(fontsize=25)
-		mpl.yticks(fontsize=25)
-		mpl.xlabel(r'$\mathbf{z}$',fontsize=30)
-		mpl.ylabel(r'$\mathbf{uv}$',fontsize=30)
-		write = '../Data/processedData/figures/uv_'+str(pumpSpeed[d])+'.png'
-		mpl.savefig(write)
-	#	mpl.show()
-		mpl.close()
+		plot1, = mpl.semilogx(d1.z,d1.UxMean,linestyle = 'None',color = 'k', marker = '.',label = r'$x=300$ (mm)')
+		mpl.errorbar(d1.z,d1.UxMean,yerr=d1.error_UxMean, linestyle = "None",color = 'k')
 	#
+		plot2, = mpl.semilogx(d2.z,d2.UxMean,linestyle = 'None',color = 'r', marker = 'x',label = r'$x=400$ (mm)')
+		mpl.errorbar(d2.z,d2.UxMean,yerr=d2.error_UxMean, linestyle = "None",color = 'k')
+		mpl.xticks(fontsize=25)
+		mpl.yticks(fontsize=25)
+		mpl.xlabel(r'$z$ (mm)',fontsize=30)
+		mpl.ylabel(r'$\mu_u$ (m/s)',fontsize=30)
+		mpl.legend(handles=[plot1,plot2],loc=2)
+		write = '../Data/processedData/figures/meanU_'+str(pumpSpeed[i])+'.png'
+		mpl.savefig(write)
+#		mpl.show()
+		mpl.close()
+##	Plot std U
+		mpl.rc('text', usetex=True)
+		mpl.rc('font', family='serif')
+		plot1, = mpl.semilogx(d1.z,d1.uxRMS,linestyle = 'None',color = 'r', marker = '.',label = r'$\sigma_u$ at $x=300$ (mm)')
+		mpl.errorbar(d1.z,d1.uxRMS,yerr=d1.error_uxRMS, linestyle = "None",color = 'k')
+		plot2, = mpl.semilogx(d1.z,d1.uyRMS,linestyle = 'None',color = 'g', marker = '.',label = r'$\sigma_v$ at $x=300$ (mm)')
+		mpl.errorbar(d1.z,d1.uyRMS,yerr=d1.error_uyRMS, linestyle = "None",color = 'k')
 	#
-###############	TEMP LOCATION OF LAW OF THE WALL FUNCTION - MOVE THIS LATER ################
+		plot3, = mpl.semilogx(d2.z,d2.uxRMS,linestyle = 'None',color = 'b', marker = 'x',label = r'$\sigma_v$ at $x=400$ (mm)')
+		mpl.errorbar(d2.z,d2.uxRMS,yerr=d2.error_uxRMS, linestyle = "None",color = 'k')
+		plot4, = mpl.semilogx(d2.z,d2.uyRMS,linestyle = 'None',color = 'k', marker = 'x',label = r'$\sigma_u$ at $x=400$ (mm)')
+		mpl.errorbar(d2.z,d2.uyRMS,yerr=d2.error_uyRMS, linestyle = "None",color = 'k')
+#
+		mpl.xticks(fontsize=25)
+		mpl.yticks(fontsize=25)
+		mpl.xlabel(r'$z$ (mm)',fontsize=30)
+		mpl.ylabel(r'$\sigma_u,\sigma_v$ (m/s)',fontsize=30)
+		mpl.legend(handles=[plot1,plot2,plot3,plot4],loc=1)
+		write = '../Data/processedData/figures/std_'+str(pumpSpeed[i])+'.png'
+		mpl.savefig(write)
+#		mpl.show()
+		mpl.close()
+##	Plot cov
+		mpl.rc('text', usetex=True)
+		mpl.rc('font', family='serif')
+		plot1, = mpl.semilogx(d1.z,d1.uv,linestyle = 'None',color = 'k', marker = '.',label = r'$x=300$ (mm)')
+		mpl.errorbar(d1.z,d1.uv,yerr=d1.error_uv, linestyle = "None",color = 'k')
+	#
+		plot2, = mpl.semilogx(d2.z,d2.uv,linestyle = 'None',color = 'r', marker = 'x',label = r'$x=400$ (mm)')
+		mpl.errorbar(d2.z,d2.uv,yerr=d2.error_uv, linestyle = "None",color = 'k')
+		mpl.xticks(fontsize=25)
+		mpl.yticks(fontsize=25)
+		mpl.xlabel(r'$z$ (mm)',fontsize=30)
+		mpl.ylabel(r'$\gamma_{u,v}$ (m\textsuperscript{2}/s\textsuperscript{2})',fontsize=30)
+		mpl.legend(handles=[plot1,plot2],loc=2)
+		write = '../Data/processedData/figures/cov_'+str(pumpSpeed[i])+'.png'
+		mpl.savefig(write)
+#		mpl.show()
+		mpl.close()
+
+
+
+#		mpl.plot(data[d].z,data[d].uxRMS,linestyle = 'None', marker = '.')
+#		mpl.errorbar(data[d].z,data[d].uxRMS,yerr=data[d].error_uxRMS, linestyle = "None")
+#		mpl.rc('text', usetex=True)
+#		mpl.rc('font', family='serif')
+#		mpl.xticks(fontsize=25)
+#		mpl.yticks(fontsize=25)
+#		mpl.xlabel(r'$\mathbf{z}$',fontsize=30)
+#		mpl.ylabel(r'$\mathbf{RMS(U)}$',fontsize=30)
+##		write = '../Data/processedData/figures/rmsU_'+str(pumpSpeed[d])+'.png'
+#		mpl.savefig(write)
+#	#	mpl.show()
+#		mpl.close()
+#		mpl.plot(data[d].z,data[d].uyRMS,linestyle = 'None', marker = '.')
+#		mpl.errorbar(data[d].z,data[d].uyRMS,yerr=data[d].error_uyRMS, linestyle = "None")
+#		mpl.rc('text', usetex=True)
+#		mpl.rc('font', family='serif')
+#		mpl.xticks(fontsize=25)
+#		mpl.yticks(fontsize=25)
+#		mpl.xlabel(r'$\mathbf{z}$',fontsize=30)
+#		mpl.ylabel(r'$\mathbf{RMS(W)}$',fontsize=30)
+#		write = '../Data/processedData/figures/rmsW_'+str(pumpSpeed[d])+'.png'
+#		mpl.savefig(write)
+#	#	mpl.show()
+#		mpl.close()
+#		mpl.plot(data[d].z,data[d].uv,linestyle = 'None', marker = '.')
+#		mpl.errorbar(data[d].z,data[d].uv,yerr=data[d].error_uv, linestyle = "None")
+#		mpl.rc('text', usetex=True)
+#		mpl.rc('font', family='serif')
+#		mpl.xticks(fontsize=25)
+#		mpl.yticks(fontsize=25)
+#		mpl.xlabel(r'$\mathbf{z}$',fontsize=30)
+#		mpl.ylabel(r'$\mathbf{uv}$',fontsize=30)
+#		write = '../Data/processedData/figures/uv_'+str(pumpSpeed[d])+'.png'
+#		mpl.savefig(write)
+#	#	mpl.show()
+#		mpl.close()
+#	#
+#	#
+################	TEMP LOCATION OF LAW OF THE WALL FUNCTION - MOVE THIS LATER ################
 ####
 ####	1. 	define new variables
 ##	Initialise variables using the full data set and iterate to find log-law region by removing extremes of z
@@ -192,66 +240,67 @@ def linearReg(X,Y):
 	beta = np.sum( (X-np.mean(X)) * (Y-np.mean(Y)) ) / np.sum( (Y - np.mean(Y))**2 ) 
 	alpha = np.mean(X) - beta*np.mean(Y)
 	return [alpha,beta]
+testing = False
+if testing == True:
+	data4 = pd.read_pickle(dataPath[0])
+	data8 = pd.read_pickle(dataPath[2])
 
-data4 = pd.read_pickle(dataPath[0])
-data8 = pd.read_pickle(dataPath[2])
-
-Ulab4 = data4.UxMean.as_matrix()
-Ylab4 = data4.z.as_matrix()/1000
-Ulab8 = data8.UxMean.as_matrix()
-Ylab8 = data8.z.as_matrix()/1000
-
-nu = 1.1*10**(-6)
-kappa = 0.41
-Cplus = 5.2
-[Utau4,Delta4] = FDP(Ulab4,Ylab4)
-[Utau8,Delta8] = FDP(Ulab8,Ylab8)
-
-Yplus4 = (Ylab4-Delta4)*Utau4/nu
-Uplus4 = Ulab4/Utau4
-Yplus8 = (Ylab8-Delta8)*Utau8/nu
-Uplus8 = Ulab8/Utau8
-
-mpl.semilogx(Yplus4,Uplus4,linestyle=' ',marker = 'o')
-mpl.errorbar(Yplus4,Uplus4,yerr=data4.error_UxMean/Utau4, linestyle = "None",ecolor='k', capthick=2)
-#
-mpl.plot(Yplus4,Yplus4)
-mpl.plot(Yplus4,np.log(Yplus4)/kappa+Cplus)
-mpl.axis([0,np.max(Yplus4),0,np.max(Uplus4)+0.05*np.max(Uplus4)])
-mpl.rc('text', usetex=True)
-mpl.rc('font', family='serif')
-mpl.xticks(fontsize=25)
-mpl.yticks(fontsize=25)
-mpl.xlabel(r'$\mathbf{z^+}$',fontsize=30)
-mpl.ylabel(r'$\mathbf{U^+}$',fontsize=30)
-mpl.savefig('../Data/processedData/figures/Uplus_4hz.png')
-#mpl.show()
-mpl.close()
-
-mpl.semilogx(Yplus8,Uplus8,linestyle=' ',marker = '*')
-mpl.errorbar(Yplus8,Uplus8,yerr=data8.error_UxMean/Utau8, linestyle = "None",ecolor='k', capthick=2)
-#
-mpl.plot(Yplus8,Yplus8)
-mpl.plot(Yplus8,np.log(Yplus8)/kappa+Cplus)
-mpl.axis([0,np.max(Yplus8),0,np.max(Uplus8)+0.05*np.max(Uplus8)])
-mpl.rc('text', usetex=True)
-mpl.rc('font', family='serif')
-mpl.xticks(fontsize=25)
-mpl.yticks(fontsize=25)
-mpl.xlabel(r'$\mathbf{z^+}$',fontsize=30)
-mpl.ylabel(r'$\mathbf{U^+}$',fontsize=30)
-mpl.savefig('../Data/processedData/figures/Uplus_8hz.png')
-#mpl.show()
-mpl.close()
-
-
+	Ulab4 = data4.UxMean.as_matrix()
+	Ylab4 = data4.z.as_matrix()/1000
+	Ulab8 = data8.UxMean.as_matrix()
+	Ylab8 = data8.z.as_matrix()/1000
+	
+	nu = 1.1*10**(-6)
+	kappa = 0.41
+	Cplus = 5.2
+	[Utau4,Delta4] = FDP(Ulab4,Ylab4)
+	[Utau8,Delta8] = FDP(Ulab8,Ylab8)
+	
+	Yplus4 = (Ylab4-Delta4)*Utau4/nu
+	Uplus4 = Ulab4/Utau4
+	Yplus8 = (Ylab8-Delta8)*Utau8/nu
+	Uplus8 = Ulab8/Utau8
+	
+	mpl.semilogx(Yplus4,Uplus4,linestyle=' ',marker = 'o')
+	mpl.errorbar(Yplus4,Uplus4,yerr=data4.error_UxMean/Utau4, linestyle = "None",ecolor='k', capthick=2)
+	#
+	mpl.plot(Yplus4,Yplus4)
+	mpl.plot(Yplus4,np.log(Yplus4)/kappa+Cplus)
+	mpl.axis([0,np.max(Yplus4),0,np.max(Uplus4)+0.05*np.max(Uplus4)])
+	mpl.rc('text', usetex=True)
+	mpl.rc('font', family='serif')
+	mpl.xticks(fontsize=25)
+	mpl.yticks(fontsize=25)
+	mpl.xlabel(r'$\mathbf{z^+}$',fontsize=30)
+	mpl.ylabel(r'$\mathbf{U^+}$',fontsize=30)
+	mpl.savefig('../Data/processedData/figures/Uplus_4hz.png')
+	#mpl.show()
+	mpl.close()
+	
+	mpl.semilogx(Yplus8,Uplus8,linestyle=' ',marker = '*')
+	mpl.errorbar(Yplus8,Uplus8,yerr=data8.error_UxMean/Utau8, linestyle = "None",ecolor='k', capthick=2)
+	#
+	mpl.plot(Yplus8,Yplus8)
+	mpl.plot(Yplus8,np.log(Yplus8)/kappa+Cplus)
+	mpl.axis([0,np.max(Yplus8),0,np.max(Uplus8)+0.05*np.max(Uplus8)])
+	mpl.rc('text', usetex=True)
+	mpl.rc('font', family='serif')
+	mpl.xticks(fontsize=25)
+	mpl.yticks(fontsize=25)
+	mpl.xlabel(r'$\mathbf{z^+}$',fontsize=30)
+	mpl.ylabel(r'$\mathbf{U^+}$',fontsize=30)
+	#mpl.savefig('../Data/processedData/figures/Uplus_8hz.png')
+	#mpl.show()
+	mpl.close()
+	
+	
 #	Test y values for a given y^+
-print('4hz: For yplus = 5: y = ',5*nu/Utau4)
-print('4hz: For yplus = 10: y = ',10*nu/Utau4)
-print('4hz: For yplus = 20: y = ',20*nu/Utau4)
-print('8hz: For yplus = 5: y = ',5*nu/Utau8)
-print('8hz: For yplus = 10: y = ',10*nu/Utau8)
-print('8hz: For yplus = 20: y = ',20*nu/Utau8)
+#print('4hz: For yplus = 5: y = ',5*nu/Utau4)
+#print('4hz: For yplus = 10: y = ',10*nu/Utau4)
+#print('4hz: For yplus = 20: y = ',20*nu/Utau4)
+#print('8hz: For yplus = 5: y = ',5*nu/Utau8)
+#print('8hz: For yplus = 10: y = ',10*nu/Utau8)
+#print('8hz: For yplus = 20: y = ',20*nu/Utau8)
 
 
 

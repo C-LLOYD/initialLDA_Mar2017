@@ -265,8 +265,8 @@ if plotSimpleTimeDep == True:
 #	u5 = data_8_15.UxMean/np.mean(data_8_15.UxMean.loc[data_8_15.timeStamp[:]>270]),
 	u6 = data_8_40.UxMean/np.mean(data_8_40.UxMean.loc[data_8_40.timeStamp[:]>270]),
 	u2 = [],u5 = [],
-	u1Lab = '4 Hz, y = 1 mm',	u2Lab = '4 Hz, y = 15 mm',	u3Lab = '4 Hz, y = 40 mm',
-	u4Lab = '8 Hz, y = 1 mm',	u5Lab = '8 Hz, y = 15 mm',	u6Lab = '8 Hz, y = 40 mm',
+	u1Lab = '4 Hz, z = 1 mm',	u2Lab = '4 Hz, z = 15 mm',	u3Lab = '4 Hz, z = 40 mm',
+	u4Lab = '8 Hz, z = 1 mm',	u5Lab = '8 Hz, z = 15 mm',	u6Lab = '8 Hz, z = 40 mm',
 	ylabel = r'$\frac{\mu_u(t)}{\mu_{u}(300)}$',	xlabel = r'$t$ (s)',	legend = True,
 	writeString = "../Data/processedData/figures/UxMeanTConvergence.png")
 #
@@ -280,8 +280,8 @@ if plotSimpleTimeDep == True:
 #	u5 = data_8_15.UxMean/np.mean(data_8_15.UxMean.loc[data_8_15.timeStamp[:]>270]),
 	u6 = data_8_40.UxMean/np.mean(data_8_40.UxMean.loc[data_8_40.timeStamp[:]>270]),
 	u2 = [],u5 = [],
-	u1Lab = '4 Hz, y = 1 mm',	u2Lab = '4 Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
-	u4Lab = '8 Hz, y = 1 mm',	u5Lab = '8 Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
+	u1Lab = '4 Hz, z = 1 mm',	u2Lab = '4 Hz, z = 15mm',	u3Lab = '4Hz, z = 40mm',
+	u4Lab = '8 Hz, z = 1 mm',	u5Lab = '8 Hz, z = 15mm',	u6Lab = '8Hz, z = 40mm',
 	ylabel = r'$\frac{\mu_u(t)}{\mu_{u}(300)}$',	xlabel = r'$N$',	legend = False,
 	writeString = "../Data/processedData/figures/UxMeanNConvergence.png")
 #
@@ -297,8 +297,8 @@ if plotSimpleTimeDep == True:
 #	u5 = data_8_15.UyMean/np.mean(data_8_15.UyMean.loc[data_8_15.timeStamp[:]>270]),
 	u6 = data_8_40.UyMean/np.mean(data_8_40.UyMean.loc[data_8_40.timeStamp[:]>270]),
 	u2 = [],u5 = [],
-	u1Lab = '4Hz, y = 1mm',	u2Lab = '4Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
-	u4Lab = '8Hz, y = 1mm',	u5Lab = '8Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
+	u1Lab = '4Hz, z = 1mm',	u2Lab = '4Hz, z = 15mm',	u3Lab = '4Hz, y = 40mm',
+	u4Lab = '8Hz, z = 1mm',	u5Lab = '8Hz, z = 15mm',	u6Lab = '8Hz, y = 40mm',
 	ylabel = r'$\frac{\mu_v(t)}{\mu_{v}(300)}$',	xlabel = r'$t$ (s)',	legend = False,
 	writeString = "../Data/processedData/figures/UyMeanTConvergence.png")
 #
@@ -314,7 +314,7 @@ if plotSimpleTimeDep == True:
 	u2 = [],u5 = [],
 	u1Lab = '4Hz, y = 1mm',	u2Lab = '4Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
 	u4Lab = '8Hz, y = 1mm',	u5Lab = '8Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
-	ylabel = r'$\frac{\mu_v(t)}{\mu_{v}(300)}$',	xlabel = r'$N$',	legend = False,
+	ylabel = r'$\frac{\mu_v(t)}{\mu_{v}(300)}$',	xlabel = r'$N$',	legend = True,
 	writeString = "../Data/processedData/figures/UyMeanNConvergence.png")
 #
 #
@@ -331,7 +331,7 @@ if plotSimpleTimeDep == True:
 	u2 = [],u5 = [],
 	u1Lab = '4Hz, y = 1mm',	u2Lab = '4Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
 	u4Lab = '8Hz, y = 1mm',	u5Lab = '8Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
-	ylabel = r'$\frac{\sigma_u(t)}{\sigma_{u}(300)}$',	xlabel = r'$t$ (s)',	legend = False,
+	ylabel = r'$\frac{\sigma_u(t)}{\sigma_{u}(300)}$',	xlabel = r'$t$ (s)',	legend = True,
 	writeString = "../Data/processedData/figures/uxRMSTConvergence.png")
 #
 	simplePlotter(
@@ -363,7 +363,7 @@ if plotSimpleTimeDep == True:
 	u2 = [],u5 = [],
 	u1Lab = '4Hz, y = 1mm',	u2Lab = '4Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
 	u4Lab = '8Hz, y = 1mm',	u5Lab = '8Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
-	ylabel = r'$\frac{\sigma_v(t)}{\sigma_{v}(300)}$',	xlabel = r'$t$ (s)',	legend = False,
+	ylabel = r'$\frac{\sigma_v(t)}{\sigma_{v}(300)}$',	xlabel = r'$t$ (s)',	legend = True,
 	writeString = "../Data/processedData/figures/uyRMSTConvergence.png")
 #
 	simplePlotter(
@@ -409,10 +409,32 @@ if plotSimpleTimeDep == True:
 	u2 = [],u5 = [],
 	u1Lab = '4Hz, y = 1mm',	u2Lab = '4Hz, y = 15mm',	u3Lab = '4Hz, y = 40mm',
 	u4Lab = '8Hz, y = 1mm',	u5Lab = '8Hz, y = 15mm',	u6Lab = '8Hz, y = 40mm',
-	ylabel = r'$\frac{\gamma_{u,v}(t)}{\gamma_{u,v}(300)}$',	xlabel = r'$N$',	legend = False,
+	ylabel = r'$\frac{\gamma_{u,v}(t)}{\gamma_{u,v}(300)}$',	xlabel = r'$N$',	legend = True,
 	writeString = "../Data/processedData/figures/uvNConvergence.png")
 #
 
+
+
+testing = False
+if testing == True:
+	fig = mpl.figure()
+	ax = fig.add_subplot(1, 1, 1)
+	# Move left y-axis and bottim x-axis to centre, passing through (0,0)
+	ax.spines['left'].set_position('center')
+	ax.spines['bottom'].set_position('center')
+	# Eliminate upper and right axes
+	ax.spines['right'].set_color('none')
+	ax.spines['top'].set_color('none')
+	#mpl.gca().set_aspect('equal', adjustable='box')
+	# Show ticks in the left and lower axes only
+	ax.xaxis.set_ticks_position('bottom')
+	ax.yaxis.set_ticks_position('left')
+	u = (d.Ux-np.mean(d.Ux))
+	v = (d.Uy-np.mean(d.Uy))
+	mpl.scatter(d.Ux-np.mean(d.Ux),d.Uy-np.mean(d.Uy))
+	mpl.axis([-np.max(np.abs(u)),np.max(np.abs(u)),-np.max(np.abs(v)),np.max(np.abs(v))])
+	mpl.show()
+	
 
 
 #######################################################################################
