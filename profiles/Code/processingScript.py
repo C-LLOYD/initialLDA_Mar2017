@@ -35,9 +35,9 @@ from FilterFunctions import Filter
 ##	1.	Loop over data: Put this in at the end
 #
 ##	2.	import txt file: Give a hard coded name for now
-writeData = True
+writeData = False
 #writeData = True
-plotDimensionedData = True
+plotDimensionedData = False
 
 
 rawPath = 	["../Data/rawData/4hz/300mm/*/*.txt",
@@ -267,8 +267,8 @@ def wallFinder(U,Y):
 		amax = a[np.where(r == np.max(r))][0]
 		bmax = b[np.where(r == np.max(r))][0]
 		rmax = r[np.where(r == np.max(r))][0]
-		Nmax = N[np.where(r == np.max(r))][0]
-		print(Nmax)
+		Nmax = int(N[np.where(r == np.max(r))][0])
+#		print(type(Nmax))
 #
 ##	We now have laminar layer : U[0:Nmax] = bmax*Y[0:Nmax] + amax
 ##	
@@ -276,12 +276,16 @@ def wallFinder(U,Y):
 #		Delta = amax/bmax
 		Ynew = Y - amax
 		[a1,b1,r1] = linearReg(Ynew[0:Nmax],U[0:Nmax])
-		plt.plot(Ynew[0:Nmax+10],U[0:Nmax+10],linestyle=' ',marker='o')
-		plt.plot(U[0:Nmax+10]*b1+a1,U[0:Nmax+10])
-		plt.show()
-		plt.close()
+#
+##	Estimate Utau from linear part
+		nu = 1.1*10**(-6)
+		Utau = np.sqrt(nu/b1)
+#		plt.plot(Ynew[0:Nmax+10],U[0:Nmax+10],linestyle=' ',marker='o')
+#		plt.plot(U[0:Nmax+10]*b1+a1,U[0:Nmax+10])
+#		plt.show()
+#		plt.close()
 #		print(amax,a1,rmax,r1)
-		return [amax, Ynew]
+		return [Utau,Ynew]
 
 
 
@@ -291,9 +295,19 @@ if test2 == True:
 	for j in range(len(d)):
 		U = d[j].UxMean.as_matrix()
 		Y = d[j].z.as_matrix()/1000
-		[Delta,Ynew] = wallFinder(U,Y)
-		print(Delta)
-		print(Ynew)
+		[UtauEst,Ynew] = wallFinder(U,Y)
+		Y = Ynew
+#
+##	Check if this works as a scalar:
+		nu = 1.1*10**(-6)		
+		plt.semilogx(Y*UtauEst/nu,U/UtauEst,ls=' ',marker='o')
+		plt.plot(Y[0:100]*UtauEst/nu,Y[0:100]*UtauEst/nu)
+		plt.plot(Y*UtauEst/nu,np.log(Y*UtauEst/nu)/0.41+5.2)
+		plt.show()
+		plt.close()
+#		[Delta,Ynew] = wallFinder(U,Y)
+#		print(Delta)
+#		print(Ynew)
 #
 
 
