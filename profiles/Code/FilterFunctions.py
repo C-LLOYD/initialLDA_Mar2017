@@ -76,7 +76,7 @@ def Filter(data,filterMethod,averageMethod,window,writePaths_figures,writePath_d
 			t	= t[~Spikes]
 			resT	= resT[~Spikes]
 			s	= s[~Spikes]
-			print('Number of spikes = '+str(len(Ux)-len(UxNew))+' = '+str((float(len(Ux))-float(len(UxNew)))/(float(len(Ux))/100))+'%')
+#			print('Number of spikes = '+str(len(Ux)-len(UxNew))+' = '+str((float(len(Ux))-float(len(UxNew)))/(float(len(Ux))/100))+'%')
 #			
 ##	Add variables to existing data frame.
 ##	Variables first need to be converted to 'pandas.series'
