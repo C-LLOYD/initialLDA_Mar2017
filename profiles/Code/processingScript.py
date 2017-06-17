@@ -37,7 +37,7 @@ from FilterFunctions import Filter
 ##	2.	import txt file: Give a hard coded name for now
 writeData = False
 #writeData = True
-plotDimensionedData = False
+plotDimensionedData = True
 
 
 rawPath = 	["../Data/rawData/4hz/300mm/*/*.txt",
@@ -152,7 +152,7 @@ if plotDimensionedData == True:
 		plt.errorbar(d2.z,d2.UxMean,yerr=d2.error_UxMean, linestyle = "None",color = 'k')
 	#	plt.xticks(fontsize=25)
 	#	plt.yticks(fontsize=25)
-		plt.xlabel(r'$z$ (mm)',fontsize=30)
+		plt.xlabel(r'$y$ (mm)',fontsize=30)
 		plt.ylabel(r'$\mu_u$ (m/s)',fontsize=30)
 		ax.ticklabel_format(axis='y', style='sci', scilimits=(-3,1))
 		ax.tick_params(axis='x', pad=15)
@@ -184,7 +184,7 @@ if plotDimensionedData == True:
 #
 	#	plt.xticks(fontsize=25)
 	#	plt.yticks(fontsize=25)
-		plt.xlabel(r'$z$ (mm)',fontsize=30)
+		plt.xlabel(r'$y$ (mm)',fontsize=30)
 		plt.ylabel(r'$\sigma_u,\sigma_v$ (m/s)',fontsize=30)
 		ax.ticklabel_format(axis='y', style='sci', scilimits=(-3,1))
 		ax.tick_params(axis='x', pad=15)
@@ -213,7 +213,7 @@ if plotDimensionedData == True:
 		plt.errorbar(d2.z,d2.uv,yerr=d2.error_uv, linestyle = "None",color = 'k')
 	#	plt.xticks(fontsize=25)
 	#	plt.yticks(fontsize=25)
-		plt.xlabel(r'$z$ (mm)',fontsize=30)
+		plt.xlabel(r'$y$ (mm)',fontsize=30)
 		plt.ylabel(r'$\gamma_{u,v}$ (m\textsuperscript{2}/s\textsuperscript{2})',fontsize=30)
 #		plt.legend(handles=[plot1,plot2],loc=3)
 	#	ax.legend(handles=[plot1,plot2],loc='upper right', bbox_to_anchor=(1, 1.05))
@@ -292,19 +292,62 @@ def wallFinder(U,Y):
 test2 = True
 if test2 == True:
 	d = [pd.read_pickle(dataPath[0]),pd.read_pickle(dataPath[1]),pd.read_pickle(dataPath[2]),pd.read_pickle(dataPath[3])]
+	case = ['4Hz_300','4Hz_400','8Hz_300','8Hz_400']
 	for j in range(len(d)):
 		U = d[j].UxMean.as_matrix()
+		e = d[j].error_UxMean.as_matrix()
 		Y = d[j].z.as_matrix()/1000
 		[UtauEst,Ynew] = wallFinder(U,Y)
 		Y = Ynew
 #
 ##	Check if this works as a scalar:
-		nu = 1.1*10**(-6)		
-		plt.semilogx(Y*UtauEst/nu,U/UtauEst,ls=' ',marker='o')
-		plt.plot(Y[0:100]*UtauEst/nu,Y[0:100]*UtauEst/nu)
-		plt.plot(Y*UtauEst/nu,np.log(Y*UtauEst/nu)/0.41+5.2)
-		plt.show()
+		nu = 1.1*10**(-6)
+		kappa = 0.41
+		B = 5.2		
+#		plt.semilogx(Y*UtauEst/nu,U/UtauEst,ls=' ',marker='o')
+#		plt.plot(Y[0:100]*UtauEst/nu,Y[0:100]*UtauEst/nu)
+#		plt.plot(Y*UtauEst/nu,np.log(Y*UtauEst/nu)/kappa+B)
+#		plt.show()
+#		plt.close()
+#
+##	Use as estimate for range of log-law
+		Ulog = U[np.where((Y*UtauEst/nu > 30) & (Y*UtauEst/nu < 150))]
+		Ylog = np.log(Y[np.where((Y*UtauEst/nu > 30) & (Y*UtauEst/nu < 150))])
+#		print(Ulog,Ylog)
+#		print(U,Y)
+#		print(type(Ulog),type(U))
+		[a,b,r] = linearReg(Ulog,Ylog)
+		Utau = b*kappa
+		print(Utau,UtauEst,(UtauEst-Utau)/UtauEst)#,0.1*Utau/nu,0.1*UtauEst/nu)
+		B = a/Utau - np.log(Utau/nu)/kappa
+#		print(B)
+#
+##		Plot new
+
+		f=plt.figure()
+		ax = f.add_subplot(111)
+		font = {'family' : 'monospace',
+        'weight' : 'bold',
+        'size'   : 20}
+#
+		plt.rc('font', **font)
+		plt.rc('text', usetex=True)
+#
+		plt.semilogx(Y*Utau/nu,U/Utau,ls=' ',marker='o',color='k')
+		plt.errorbar(Y*Utau/nu,U/Utau,yerr=e/Utau, linestyle = "None",color = 'k')
+		plt.plot(Y[0:100]*UtauEst/nu,Y[0:100]*UtauEst/nu,ls='-',color='r')
+		plt.plot(Y*Utau/nu,np.log(Y*Utau/nu)/kappa+B,ls='-',color='b')
+		plt.xlabel(r'$y^+$',fontsize=30)
+		plt.ylabel(r'$U^+$',fontsize=30)
+#		ax.ticklabel_format(axis='y', style='sci', scilimits=(-3,1))
+		ax.tick_params(axis='x', pad=15)
+		mpl.ticker.ScalarFormatter(useMathText = True)
+		write = '../Data/processedData/figures/Uplus_Yplus_'+str(case[j])+'.png'
+		plt.savefig(write)
+#		plt.show()
 		plt.close()
+		
+
 #		[Delta,Ynew] = wallFinder(U,Y)
 #		print(Delta)
 #		print(Ynew)
