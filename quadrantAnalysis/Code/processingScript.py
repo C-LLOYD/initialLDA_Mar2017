@@ -43,9 +43,11 @@ if readData == True:
 
 #
 ##	For now, take u component of velocity
-u = data.Ux.as_matrix()
+U = data.Ux.as_matrix()
 tau = data.resTime.as_matrix()
-N = data.sampleNumber.as_matrix()
+u = U*tau
+#N = data.sampleNumber.as_matrix()
+N = len(u)
 #
 ##	Set up bins such that they cover whole range of u
 Nbins = 99
@@ -69,18 +71,19 @@ n[-1] = np.sum(index)
 if n[i] > 0:
 	taui[-1] = np.mean(tau[index])
 
-#PDF = n*taui/((Delta[1]-Delta[0])*(np.sum(taui)))
-PDF = n/((Delta[1]-Delta[0])*np.max(N))
-
-print(sum(PDF*DeltaCentre))
-
-
-plt.plot(DeltaCentre,PDF)
+PDF = n*taui/((Delta[1]-Delta[0])*(np.sum(taui)))
+PDF = n/((Delta[1]-Delta[0])*N)
+PDF = n/(N)
+#plt.plot(DeltaCentre/np.max(tau),PDF)
 #plt.plot(DeltaCentre,n)
-#plt.hist(u,bins=99)
+#plt.hist(u/np.max(tau),bins=99,density=True)
+#plt.show()
+#plt.close()
+
+#[pdf,edges] = np.histogram(U*tau/np.max(tau),bins=99,normed=True)
+plt.hist(U*tau,bins=99,normed=True)
 plt.show()
 plt.close()
-
 
 
 
