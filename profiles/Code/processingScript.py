@@ -37,7 +37,7 @@ from FilterFunctions import Filter
 ##	2.	import txt file: Give a hard coded name for now
 writeData = False
 #writeData = True
-plotDimensionedData = True
+plotDimensionedData = False
 
 
 rawPath = 	["../Data/rawData/4hz/300mm/*/*.txt",
@@ -289,7 +289,7 @@ def wallFinder(U,Y):
 
 
 
-test2 = True
+test2 = False
 if test2 == True:
 	d = [pd.read_pickle(dataPath[0]),pd.read_pickle(dataPath[1]),pd.read_pickle(dataPath[2]),pd.read_pickle(dataPath[3])]
 	case = ['4Hz_300','4Hz_400','8Hz_300','8Hz_400']
@@ -371,6 +371,25 @@ if test2 == True:
 #		plt.show()
 #		print(r1)
 		
+#
+##		Shape factor and integral methods etc...
+test3 = True
+if test3 == True:
+	d = [pd.read_pickle(dataPath[0]),pd.read_pickle(dataPath[1]),pd.read_pickle(dataPath[2]),pd.read_pickle(dataPath[3])]
+	case = ['4Hz_300','4Hz_400','8Hz_300','8Hz_400']
+	for j in range(len(d)):
+		U = d[j].UxMean.as_matrix()
+		Y = d[j].z.as_matrix()/1000
+		U0 = np.max(U)
+		deltaStar = np.sum((1-U/U0)*Y)
+		theta = np.sum((1-U/U0)*U*Y/U0)
+		H = deltaStar/theta
+		ReTheta = theta*U0/1.1e-6
+		print(case[j],ReTheta,H)
+	
+
+
+
 
 testing = False
 if testing == True:
