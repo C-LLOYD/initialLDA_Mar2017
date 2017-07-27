@@ -56,7 +56,7 @@ V = data.Uy.as_matrix()
 tau = data.resTime.as_matrix()
 u = ((U-np.sum(U*tau)/np.sum(tau)))#*tau/np.max(tau)
 v = ((V-np.sum(V*tau)/np.sum(tau)))#*tau/np.max(tau)
-uv = u*v
+#print(data)
 
 pdfTests = False
 if pdfTests == True:
@@ -130,46 +130,18 @@ if corrTests == True:
 		Aloc = np.where(xCen == A)
 		Bloc = np.where(yCen == B)
 		PDF[Bloc,Aloc] = PDF[Bloc,Aloc] + t
-		test[Bloc,Aloc] = test[Bloc,Aloc] + 1
-#		print(t,test[Bloc,Aloc],PDF[Bloc,Aloc])
 	PDF = (np.ma.masked_where(PDF==0,PDF))/sum(tau)
-	test = (np.ma.masked_where(test==0,test))/len(u)
 	WPDF = (PDF*XCen*YCen)
-	test2 = test*XCen*YCen
 #
-	plt.figure()
-#	fig1 = plt.pcolormesh(XCen,YCen,PDF)
-	fig1 = plt.contour(XCen,YCen,abs((PDF-test)/PDF),10)
-	plt.clabel(fig1, inline=1, fontsize=10)
-	plt.axvline();	plt.axhline();
-
-	plt.figure()
-#	fig1 = plt.pcolormesh(XCen,YCen,PDF)
-	fig3 = plt.contour(XCen,YCen,test,10)
-#	plt.clabel(fig1, inline=1, fontsize=10)
-	plt.axvline();	plt.axhline();
-
 	plt.figure()
 #	fig1 = plt.pcolormesh(XCen,YCen,PDF)
 	fig2 = plt.contour(XCen,YCen,WPDF,10)
 #	plt.clabel(fig2, inline=1, fontsize=10)
 	plt.axvline();	plt.axhline();
-
-	plt.figure()
-#	fig1 = plt.pcolormesh(XCen,YCen,PDF)
-	fig2 = plt.contour(XCen,YCen,test2,10)
-#	plt.clabel(fig2, inline=1, fontsize=10)
-	plt.axvline();	plt.axhline();
-
-	plt.figure()
-	plt.scatter(XCen,PDF)
-	plt.scatter(XCen,test)
-	plt.show()
-	
-
+#
 ##	Set up hole tests - for each hole level, calculate the contributions from each
 #					quadrant, and time spent inside the hole
-holeTests = True
+holeTests = False
 if holeTests == True:
 #	print(data)
 	xMax = np.max(u)
@@ -189,36 +161,156 @@ if holeTests == True:
 	WPDF = np.zeros((len(XCen),len(YCen)))
 #
 ##	initialise H, t and quadrants
-	H = np.linspace(0,20,1)
-	print(H)
+	H = np.linspace(0,20,21)
 	Q1 = np.zeros(len(H))
 	Q2 = np.zeros(len(H))
 	Q3 = np.zeros(len(H))
 	Q4 = np.zeros(len(H))
 	inner = np.zeros(len(H))
+	outer = np.zeros(len(H))
 	time = np.zeros(len(H))
 ##	Loop through length of u/v vectors and sort them into bins
+	for i in range(len(u)):
+	#
+	##	Extract coordinate and evaluate PDF
+		coord = [u[i],v[i]]
+		t = tau[i]
+		A = find_nearest(xCen,coord[0])
+		B = find_nearest(yCen,coord[1])
+		Aloc = np.where(xCen == A)
+		Bloc = np.where(yCen == B)
+		PDF[Bloc,Aloc] = PDF[Bloc,Aloc] + t
+	#PDF = (np.ma.masked_where(PDF==0,PDF))/sum(tau)
+	PDF = PDF/sum(tau)
+	WPDF = (PDF*XCen*YCen)
+#		print(np.sum(WPDF),np.sum(u*v*tau)/np.sum(tau),data.uv.as_matrix()[-1])
+		#
 	for k in range(len(H)):
-		for i in range(len(u)):
-		#
-		##	Extract coordinate
-			coord = [u[i],v[i]]#
-			t = tau[i]
-			A = find_nearest(xCen,coord[0])
-			B = find_nearest(yCen,coord[1])
-			Aloc = np.where(xCen == A)
-			Bloc = np.where(yCen == B)
-			PDF[Bloc,Aloc] = PDF[Bloc,Aloc] + t
-#			WPDF[Bloc,Aloc] = PDF[Bloc,Aloc] + t*u[i]*v[i]
-		PDF = (np.ma.masked_where(PDF==0,PDF))/sum(tau)
-#		WPDF = (np.ma.masked_where(WPDF==0,WPDF))/sum(tau)
-		WPDF = (PDF*XCen*YCen)
-		print(np.sum(WPDF),np.sum(u*v*tau)/np.sum(tau),data.uv.as_matrix()[-1])
-		#
-		##	FIND THE HOLE
-		
+		##	Now split up the outer contributions into each quadrant
+		innerPDF = np.where(np.abs(XCen*YCen) < np.abs(H[k]*np.sum(WPDF)), WPDF, 0)
+		outerPDF = np.where(np.abs(XCen*YCen) >= np.abs(H[k]*np.sum(WPDF)), WPDF, 0)
+		Q1PDF = np.where((XCen > 0) & (YCen > 0) & (np.abs(XCen*YCen) >= np.abs(H[k]*np.sum(WPDF))), WPDF, 0)
+		Q2PDF = np.where((XCen < 0) & (YCen > 0) & (np.abs(XCen*YCen) >= np.abs(H[k]*np.sum(WPDF))), WPDF, 0)
+		Q3PDF = np.where((XCen < 0) & (YCen < 0) & (np.abs(XCen*YCen) >= np.abs(H[k]*np.sum(WPDF))), WPDF, 0)
+		Q4PDF= np.where((XCen > 0) & (YCen < 0) & (np.abs(XCen*YCen) >= np.abs(H[k]*np.sum(WPDF))), WPDF, 0)
+#
+##
+#		plt.figure()
+#		test = plt.contour(XCen,YCen,Q1PDF)
+#		test2 = plt.contour(XCen,YCen,Q2PDF)
+#		test3 = plt.contour(XCen,YCen,Q3PDF)
+#		test4 = plt.contour(XCen,YCen,Q4PDF)
+#		plt.show()
+#
+##
+		inner[k] = np.sum(innerPDF)/np.sum(WPDF)
+		outer[k] = np.sum(outerPDF)/np.sum(WPDF)
+		Q1[k] = np.sum(Q1PDF)/np.sum(WPDF)
+		Q2[k] = np.sum(Q2PDF)/np.sum(WPDF)
+		Q3[k] = np.sum(Q3PDF)/np.sum(WPDF)
+		Q4[k] = np.sum(Q4PDF)/np.sum(WPDF)
+#
+##	
+	plt.figure()
+	plot1, = plt.plot(H,Q1,'r',label='Q1')
+	plot2, = plt.plot(H,Q2,'m',label='Q2')
+	plot3, = plt.plot(H,Q3,'c',label='Q3')
+	plot4, = plt.plot(H,Q4,'g',label='Q4')
+	plot5, = plt.plot(H,inner,'b',label='Inner')
+	plot6, = plt.plot(H,outer,'k',label='Outer')
+	plt.legend(handles=[plot1, plot2, plot3, plot4, plot5, plot6],loc=5,prop={'size':12},ncol=2)
+	plt.axvline();	plt.axhline();
+#
+##
+	tempPDF = WPDF[:]
+#	tempPDF[tempPDF == 0] = np.nan
+	plt.figure()
+	fig2 = plt.contourf(XCen,YCen,tempPDF,10)
+	plt.axvline();	plt.axhline();
+	plt.show()		
 #	
 
+#
+##	NEW METHOD FOR IDENTIFYING QUADRANTS - WE DON'T USE THE PDF HERE
+newQuadMethod = True
+if newQuadMethod == True:
+#	Quad = np.zeros(len(U))
+#	Quad = np.where( (u > 0) & (v > 0), 1,Quad)
+#	Quad = np.where( (u < 0) & (v > 0), 2,Quad)
+#	Quad = np.where( (u < 0) & (v < 0), 3,Quad)
+#	Quad = np.where( (u > 0) & (v < 0), 4,Quad)
+	H = np.linspace(0,20,21)
+	Q1H = np.zeros(len(H))
+	Q2H = np.zeros(len(H))
+	Q3H = np.zeros(len(H))
+	Q4H = np.zeros(len(H))
+	innerH = np.zeros(len(H))
+	outerH = np.zeros(len(H))
+	Q1Hres = np.zeros(len(H))
+	Q2Hres = np.zeros(len(H))
+	Q3Hres = np.zeros(len(H))
+	Q4Hres = np.zeros(len(H))
+	innerHres = np.zeros(len(H))
+	outerHres = np.zeros(len(H))
+	for k in range(len(H)):
+#
+##		FIND INDICES FOR EACH VARIABLE	-	Currently this section
+#		Does not work - the commented variables below ARE correct but not properly implemented into the
+#		H vector structure. Next work will rearrange this code. 
+		Q1i = (u > 0) & (v > 0) & (np.abs(u*v*tau/np.mean(tau)) >= np.abs(H[k]*np.sum(u*v*tau)/np.sum(tau)))
+		Q2i = (u < 0) & (v > 0) & (np.abs(u*v*tau/np.mean(tau)) >= np.abs(H[k]*np.sum(u*v*tau)/np.sum(tau)))
+		Q3i = (u < 0) & (v < 0) & (np.abs(u*v*tau/np.mean(tau)) >= np.abs(H[k]*np.sum(u*v*tau)/np.sum(tau)))
+		Q4i = (u > 0) & (v < 0) & (np.abs(u*v*tau/np.mean(tau)) >= np.abs(H[k]*np.sum(u*v*tau)/np.sum(tau)))
+		inneri = (np.abs(u*v*tau/np.mean(tau)) < np.abs(H[k]*np.sum(u*v*tau)/np.sum(tau)))
+		outeri = (np.abs(u*v*tau/np.mean(tau)) >= np.abs(H[k]*np.sum(u*v*tau)/np.sum(tau)))
+#
+##		NOW UPDATE NEW VARIABLES
+		Q1H[k] = (np.sum((u*v*tau)[Q1i])/np.sum(tau[Q1i]))/(np.sum(u*v*tau)/np.sum(tau))
+		Q2H[k] = (np.sum((u*v*tau)[Q2i])/np.sum(tau[Q2i]))/(np.sum(u*v*tau)/np.sum(tau))
+		Q3H[k] = (np.sum((u*v*tau)[Q3i])/np.sum(tau[Q3i]))/(np.sum(u*v*tau)/np.sum(tau))
+		Q4H[k] = (np.sum((u*v*tau)[Q4i])/np.sum(tau[Q4i]))/(np.sum(u*v*tau)/np.sum(tau))
+		innerH[k] = (np.sum((u*v*tau)[inneri])/np.sum(tau[inneri]))/(np.sum(u*v*tau)/np.sum(tau))
+		outerH[k] = (np.sum((u*v*tau)[outeri])/np.sum(tau[outeri]))/(np.sum(u*v*tau)/np.sum(tau))
+		Q1Hres[k] = np.sum(tau[Q1i])/np.sum(tau)
+		Q2Hres[k] = np.sum(tau[Q2i])/np.sum(tau)
+		Q3Hres[k] = np.sum(tau[Q3i])/np.sum(tau)
+		Q4Hres[k] = np.sum(tau[Q4i])/np.sum(tau)
+		innerHres[k] = np.sum(tau[inneri])/np.sum(tau)
+		outerHres[k] = np.sum(tau[outeri])/np.sum(tau)
+	print(Q1H[2]+Q2H[2]+Q3H[2]+Q4H[2],outerH[2])
+	print((Q1H[2]+Q2H[2]+Q3H[2]+Q4H[2]+innerH[2]))
+#	print(Q1Hres+Q2Hres+Q3Hres+Q4Hres+innerHres)
+#	print(outerHres+innerHres)
+	plt.figure()
+	plot1, = plt.plot(H,Q1H,'r',label='Q1')
+	plot2, = plt.plot(H,Q2H,'m',label='Q2')
+	plot3, = plt.plot(H,Q3H,'c',label='Q3')
+	plot4, = plt.plot(H,Q4H,'g',label='Q4')
+	plot5, = plt.plot(H,innerH,'b',label='Inner')
+	plot6, = plt.plot(H,outerH,'k',label='Outer')
+	plt.legend(handles=[plot1, plot2, plot3, plot4, plot5, plot6],loc=5,prop={'size':12},ncol=2)
+	plt.axvline();	plt.axhline();
+	plt.show()
+
+
+
+#		Q1 = np.empty(len(u))*np.nan
+#		Q2, Q3, Q4 = np.copy(Q1), np.copy(Q1), np.copy(Q1)
+#		Q1res, Q2res, Q3res, Q4res =  np.copy(Q1), np.copy(Q1), np.copy(Q1), np.copy(Q1)
+#		Q1[Q1i] = (u*v*tau)[Q1i]
+#	print(Q1)
+#		Q2[Q2i] = (u*v*tau)[Q2i]
+##	print(Q2)
+#		Q3[Q3i] = (u*v*tau)[Q3i]
+#		Q4[Q4i] = (u*v*tau)[Q4i]
+#		Q1res[Q1i] = tau[Q1i]
+#		Q2res[Q2i] = tau[Q2i]
+#		Q3res[Q3i] = tau[Q3i]
+#		Q4res[Q4i] = tau[Q4i]
+#	print(np.nansum(Q1res)/np.sum(tau),np.nansum(Q2res)/np.sum(tau),np.nansum(Q3res)/np.sum(tau),np.nansum(Q4res)/np.sum(tau))
+#	print((np.nansum(Q1)+np.nansum(Q2)+np.nansum(Q3)+np.nansum(Q4))/np.sum(tau),np.sum(u*v*tau)/np.sum(tau))
+#
+##	Quadrants have been identified - do we worry about the hole now ...?
 
 #	
 #
