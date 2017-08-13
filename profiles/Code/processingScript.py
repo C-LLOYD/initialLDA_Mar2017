@@ -43,24 +43,32 @@ plotDimensionedData = False
 rawPath = 	["../Data/rawData/4hz/300mm/*/*.txt",
 			"../Data/rawData/4hz/400mm/*/*.txt",
 			"../Data/rawData/8hz/300mm/*/*.txt",
-			"../Data/rawData/8hz/400mm/*/*.txt"]
+			"../Data/rawData/8hz/400mm/*/*.txt",
+			"../Data/rawData/16hz/300mm/*/*.txt",
+			"../Data/rawData/16hz/400mm/*/*.txt"]
 #
 errorPath = 	["../Data/processedData/dataFrames/4hz_errors.pkl",
 			"../Data/processedData/dataFrames/4hz_errors.pkl",
 			"../Data/processedData/dataFrames/8hz_errors.pkl",
-			"../Data/processedData/dataFrames/8hz_errors.pkl"]
+			"../Data/processedData/dataFrames/8hz_errors.pkl",
+			"noData",
+			"noData"]
 #
 writePath = 	["../Data/processedData/dataFrames/4hz_300mm_profiles.pkl",
 			"../Data/processedData/dataFrames/4hz_400mm_profiles.pkl",
 			"../Data/processedData/dataFrames/8hz_300mm_profiles.pkl",
-			"../Data/processedData/dataFrames/8hz_400mm_profiles.pkl"]
+			"../Data/processedData/dataFrames/8hz_400mm_profiles.pkl",
+			"../Data/processedData/dataFrames/16hz_300mm_profiles.pkl",
+			"../Data/processedData/dataFrames/16hz_400mm_profiles.pkl"]
 #
 ##
 dataPath = 	["../Data/processedData/dataFrames/4hz_300mm_profiles.pkl",
 			"../Data/processedData/dataFrames/4hz_400mm_profiles.pkl",
 			"../Data/processedData/dataFrames/8hz_300mm_profiles.pkl",
-			"../Data/processedData/dataFrames/8hz_400mm_profiles.pkl"]
-
+			"../Data/processedData/dataFrames/8hz_400mm_profiles.pkl",
+			"../Data/processedData/dataFrames/16hz_300mm_profiles.pkl",
+			"../Data/processedData/dataFrames/16hz_400mm_profiles.pkl"]
+#
 #
 #
 if writeData == True:
@@ -85,38 +93,35 @@ if writeData == True:
 		data["error_uxRMS"] = np.nan
 		data["error_uyRMS"] = np.nan
 		data["error_uv"] = np.nan
-#
-##	Rearrange and save dataFrame - if wanted
-##	Rearrange does not work as intended : 1,10,2, ...
 		data = data.sort_values(by='z',ascending=1)
-#
-##	Now add columns for the errors, reading from the errorPath
-#
-#
-##
-		data = data.set_index("z")	
-		errorData = pd.read_pickle(errorPath[j])
-		errorData = errorData.set_index("z")
-		exactZ = errorData.index
-		for i in range(len(exactZ)):
-			data.set_value(exactZ[i],"error_UxMean", 	errorData.error_UxMean.loc[errorData.index == exactZ[i]])
-			data.set_value(exactZ[i],"error_UyMean", 	errorData.error_UyMean.loc[errorData.index == exactZ[i]])
-			data.set_value(exactZ[i],"error_uxRMS",	 	errorData.error_uxRMS.loc[errorData.index == exactZ[i]])
-			data.set_value(exactZ[i],"error_uyRMS", 	errorData.error_uyRMS.loc[errorData.index == exactZ[i]])
-			data.set_value(exactZ[i],"error_uv", 		errorData.error_uv.loc[errorData.index == exactZ[i]])
-#
-		data = data.reset_index(level=0)
-		errorData = errorData.reset_index(level=0)
-		data.set_value(0,"error_UxMean", 	errorData.error_UxMean.loc[errorData.z == np.min(errorData.z)])
-		data.set_value(0,"error_UyMean", 	errorData.error_UyMean.loc[errorData.z == np.min(errorData.z)])
-		data.set_value(0,"error_uxRMS",	 	errorData.error_uxRMS.loc[errorData.z == np.min(errorData.z)])
-		data.set_value(0,"error_uyRMS", 	errorData.error_uyRMS.loc[errorData.z == np.min(errorData.z)])
-		data.set_value(0,"error_uv", 		errorData.error_uv.loc[errorData.z == np.min(errorData.z)])
 		data = data.set_index("z")
-		data = data.apply(pd.Series.interpolate)
+#
+##	This section of code reads in the real error data and interpolates over missing entries. First we read in the error data, then
+##	rearrange for the index 'z', then place the corresponding values into each error vector. Last step - interpolate over missing data.
+		if errorPath[j] is not "noData": 
+			errorData = pd.read_pickle(errorPath[j])
+			errorData = errorData.set_index("z")
+			exactZ = errorData.index
+			for i in range(len(exactZ)):
+				data.set_value(exactZ[i],"error_UxMean", 	errorData.error_UxMean.loc[errorData.index == exactZ[i]])
+				data.set_value(exactZ[i],"error_UyMean", 	errorData.error_UyMean.loc[errorData.index == exactZ[i]])
+				data.set_value(exactZ[i],"error_uxRMS",	 	errorData.error_uxRMS.loc[errorData.index == exactZ[i]])
+				data.set_value(exactZ[i],"error_uyRMS", 	errorData.error_uyRMS.loc[errorData.index == exactZ[i]])
+				data.set_value(exactZ[i],"error_uv", 		errorData.error_uv.loc[errorData.index == exactZ[i]])
+#	
+			data = data.reset_index(level=0)
+			errorData = errorData.reset_index(level=0)
+			data.set_value(0,"error_UxMean", 	errorData.error_UxMean.loc[errorData.z == np.min(errorData.z)])
+			data.set_value(0,"error_UyMean", 	errorData.error_UyMean.loc[errorData.z == np.min(errorData.z)])
+			data.set_value(0,"error_uxRMS",	 	errorData.error_uxRMS.loc[errorData.z == np.min(errorData.z)])
+			data.set_value(0,"error_uyRMS", 	errorData.error_uyRMS.loc[errorData.z == np.min(errorData.z)])
+			data.set_value(0,"error_uv", 		errorData.error_uv.loc[errorData.z == np.min(errorData.z)])
+			data = data.set_index("z")
+			data = data.apply(pd.Series.interpolate)
+#
 		data = data.reset_index(level=0)
 #
-#	print(data)
+		print(data)
 		data.to_pickle(writePath[j])
 #
 #
@@ -124,6 +129,81 @@ if writeData == True:
 ####
 ####		Set up variables for plotting and fitting
 
+
+plotHighSpeed = True
+if plotHighSpeed == True:
+	d1 = pd.read_pickle(dataPath[4])
+	d2 = pd.read_pickle(dataPath[5])
+##	Plot mean U
+	f=plt.figure()
+	ax = f.add_subplot(111)
+	font = {'family' : 'monospace',
+        'weight' : 'bold',
+        'size'   : 20}
+#
+	plt.rc('font', **font)
+	plt.rc('text', usetex=True)
+	plot1, = plt.semilogx(d1.z,d1.UxMean,linestyle = 'None',color = 'k', marker = '.',label = r'$x=300$ (mm)',markersize=8)
+	plot2, = plt.semilogx(d2.z,d2.UxMean,linestyle = 'None',color = 'r', marker = 'x',label = r'$x=400$ (mm)',markersize=8)
+	plt.xlabel(r'$y$ (mm)',fontsize=30)
+	plt.ylabel(r'$\mu_u$ (m/s)',fontsize=30)
+	ax.ticklabel_format(axis='y', style='sci', scilimits=(-3,1))
+	ax.tick_params(axis='x', pad=15)
+	#	plt.legend(handles=[plot1,plot2],loc=2)
+	write = '../Data/processedData/figures/meanU_16hz.png'
+#		plt.savefig(write)
+	plt.show()
+	plt.close()
+##	Plot std U
+	f=plt.figure()
+	ax = f.add_subplot(111)
+	font = {'family' : 'monospace',
+        'weight' : 'bold',
+        'size'   : 20}
+#
+	plt.rc('font', **font)
+	plt.rc('text', usetex=True)
+	plot1, = plt.semilogx(d1.z,d1.uxRMS,linestyle = 'None',color = 'r', marker = '.',label = r'$\sigma_u$ at $x=300$ (mm)',markersize=8)
+	plot2, = plt.semilogx(d1.z,d1.uyRMS,linestyle = 'None',color = 'g', marker = '.',label = r'$\sigma_v$ at $x=300$ (mm)',markersize=8)
+	#
+	plot3, = plt.semilogx(d2.z,d2.uxRMS,linestyle = 'None',color = 'b', marker = 'x',label = r'$\sigma_u$ at $x=400$ (mm)',markersize=8)
+	plot4, = plt.semilogx(d2.z,d2.uyRMS,linestyle = 'None',color = 'k', marker = 'x',label = r'$\sigma_v$ at $x=400$ (mm)',markersize=8)
+	plt.xlabel(r'$y$ (mm)',fontsize=30)
+	plt.ylabel(r'$\sigma_u,\sigma_v$ (m/s)',fontsize=30)
+	ax.ticklabel_format(axis='y', style='sci', scilimits=(-3,1))
+	ax.tick_params(axis='x', pad=15)
+	ax.set_ylim(bottom=0)
+	#	plt.legend(handles=[plot1,plot2,plot3,plot4],loc=1)
+	write = '../Data/processedData/figures/std_16hz.png'
+#		plt.savefig(write)
+	plt.show()
+	plt.close()
+##	Plot cov
+	f=plt.figure()
+	ax = f.add_subplot(111)
+	font = {'family' : 'monospace',
+        'weight' : 'bold',
+        'size'   : 20}
+#
+	plt.rc('font', **font)
+	plt.rc('text', usetex=True)
+	plot1, = plt.semilogx(d1.z,d1.uv,linestyle = 'None',color = 'k', marker = '.',label = r'$x=300$ (mm)',markersize=8)
+	#
+	plot2, = plt.semilogx(d2.z,d2.uv,linestyle = 'None',color = 'r', marker = 'x',label = r'$x=400$ (mm)',markersize=8)
+	plt.xlabel(r'$y$ (mm)',fontsize=30)
+	plt.ylabel(r'$\gamma_{u,v}$ (m\textsuperscript{2}/s\textsuperscript{2})',fontsize=30)
+	ax.ticklabel_format(axis='y', style='sci', scilimits=(-3,1))
+	ax.tick_params(axis='x', pad=15)
+	mpl.ticker.ScalarFormatter(useMathText = True)
+	write = '../Data/processedData/figures/cov_16hz.png'
+	plt.savefig(write)
+	plt.show()
+#		plt.close()
+
+##
+	
+#
+##	Current code section only plots data for lower pump speeds - 16Hz speed is done separately since there is no error data
 if plotDimensionedData == True:
 	data = (pd.read_pickle(dataPath[0]),pd.read_pickle(dataPath[1]),pd.read_pickle(dataPath[2]),pd.read_pickle(dataPath[3]))
 	data1=data[0];	data2=data[1];	data3=data[2];	data4=data[3];
@@ -373,7 +453,7 @@ if test2 == True:
 		
 #
 ##		Shape factor and integral methods etc...
-test3 = True
+test3 = False
 if test3 == True:
 	d = [pd.read_pickle(dataPath[0]),pd.read_pickle(dataPath[1]),pd.read_pickle(dataPath[2]),pd.read_pickle(dataPath[3])]
 	case = ['4Hz_300','4Hz_400','8Hz_300','8Hz_400']
