@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import glob
 from processingFunctions import txtToDataFrame
+from processingFunctions import txtToGridFrame
 from processingFunctions import timeAverage
 from processingFunctions import plotter
 from processingFunctions import findDimensionlessParameters as FDP
@@ -71,8 +72,48 @@ dataPath = 	["../Data/processedData/dataFrames/4hz_300mm_profiles.pkl",
 #
 #
 #
+def isclose(a, b, rel_tol=1e-05, abs_tol=0.0):
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
+writeGrid = True
+if writeGrid == True:
+	grid = np.array([0.0])
+	dy = [0.025,0.05,0.1,0.5,1,5]
+	while grid[-1] - 2.5 < 0:
+		grid = np.append(grid,grid[-1]+dy[0])
+#		print(grid)
+	print(grid[-2])
+	print(grid[-2]==2.5)
+
+
+
+
+
+
+#	for j in range(len(rawPath)):
+#		grid = []
+#		print(rawPath[j])
+#		for fileName in glob.glob(rawPath[j]):
+#			z = txtToGridFrame(fileName)
+##			print(z)
+#
+#			if not isinstance(grid,pd.DataFrame):
+#				grid = pd.Series(z)
+#			else:
+#				grid[-1+1] = z
+##				grid = grid.append(z)
+#
+#		grid = grid.sort_values(by='z',ascending=1)
+#		grid = grid.set_index("z")
+#
+#		grid = grid.reset_index(level=0)
+#
+#		print(grid)
+#		grid.to_pickle("../Data/processedData/dataFrames/grid.pkl")
+#
+##
 if writeData == True:
-	for j in range(len(dataPath)):
+	for j in range(len(rawPath)):
 		data = []
 		print(rawPath[j])
 		for fileName in glob.glob(rawPath[j]):
@@ -88,6 +129,8 @@ if writeData == True:
 					data = dataNew
 				else:
 					data=data.append(dataNew)
+#
+#
 		data["error_UxMean"] = np.nan
 		data["error_UyMean"] = np.nan
 		data["error_uxRMS"] = np.nan
@@ -130,7 +173,7 @@ if writeData == True:
 ####		Set up variables for plotting and fitting
 
 
-plotHighSpeed = True
+plotHighSpeed = False
 if plotHighSpeed == True:
 	d1 = pd.read_pickle(dataPath[4])
 	d2 = pd.read_pickle(dataPath[5])
@@ -138,8 +181,8 @@ if plotHighSpeed == True:
 	f=plt.figure()
 	ax = f.add_subplot(111)
 	font = {'family' : 'monospace',
-        'weight' : 'bold',
-        'size'   : 20}
+       'weight' : 'bold',
+      'size'   : 20}
 #
 	plt.rc('font', **font)
 	plt.rc('text', usetex=True)
@@ -149,10 +192,30 @@ if plotHighSpeed == True:
 	plt.ylabel(r'$\mu_u$ (m/s)',fontsize=30)
 	ax.ticklabel_format(axis='y', style='sci', scilimits=(-3,1))
 	ax.tick_params(axis='x', pad=15)
-	#	plt.legend(handles=[plot1,plot2],loc=2)
+	plt.legend(handles=[plot1,plot2],loc=4)
 	write = '../Data/processedData/figures/meanU_16hz.png'
-#		plt.savefig(write)
-	plt.show()
+	plt.savefig(write)
+#	plt.show()
+	plt.close()
+##	Plot mean U
+	f=plt.figure()
+	ax = f.add_subplot(111)
+	font = {'family' : 'monospace',
+       'weight' : 'bold',
+      'size'   : 20}
+#
+	plt.rc('font', **font)
+	plt.rc('text', usetex=True)
+	plot1, = plt.semilogx(d1.z,d1.UxMean,linestyle = 'None',color = 'k', marker = '.',label = r'$x=300$ (mm)',markersize=8)
+	plot2, = plt.semilogx(d2.z,d2.UxMean,linestyle = 'None',color = 'r', marker = 'x',label = r'$x=400$ (mm)',markersize=8)
+	plt.xlabel(r'$y$ (mm)',fontsize=30)
+	plt.ylabel(r'$\mu_u$ (m/s)',fontsize=30)
+	ax.ticklabel_format(axis='y', style='sci', scilimits=(-3,1))
+	ax.tick_params(axis='x', pad=15)
+	plt.legend(handles=[plot1,plot2],loc=4)
+	write = '../Data/processedData/figures/meanU_16hz.png'
+	plt.savefig(write)
+#	plt.show()
 	plt.close()
 ##	Plot std U
 	f=plt.figure()
@@ -172,11 +235,11 @@ if plotHighSpeed == True:
 	plt.ylabel(r'$\sigma_u,\sigma_v$ (m/s)',fontsize=30)
 	ax.ticklabel_format(axis='y', style='sci', scilimits=(-3,1))
 	ax.tick_params(axis='x', pad=15)
-	ax.set_ylim(bottom=0)
-	#	plt.legend(handles=[plot1,plot2,plot3,plot4],loc=1)
+#	ax.set_ylim(bottom=0)
+	plt.legend(handles=[plot1,plot2,plot3,plot4],loc=5,bbox_to_anchor=(1.8, 0.5))
 	write = '../Data/processedData/figures/std_16hz.png'
-#		plt.savefig(write)
-	plt.show()
+	plt.savefig(write,bbox_inches='tight')
+#	plt.show()
 	plt.close()
 ##	Plot cov
 	f=plt.figure()
@@ -195,10 +258,11 @@ if plotHighSpeed == True:
 	ax.ticklabel_format(axis='y', style='sci', scilimits=(-3,1))
 	ax.tick_params(axis='x', pad=15)
 	mpl.ticker.ScalarFormatter(useMathText = True)
+	plt.legend(handles=[plot1,plot2],loc=5,bbox_to_anchor=(1.6, 0.5))
 	write = '../Data/processedData/figures/cov_16hz.png'
-	plt.savefig(write)
-	plt.show()
-#		plt.close()
+	plt.savefig(write,bbox_inches='tight')
+#	plt.show()
+	plt.close()
 
 ##
 	

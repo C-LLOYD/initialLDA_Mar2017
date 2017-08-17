@@ -121,6 +121,35 @@ def txtToDataFrame (fileName):
 	else:
 		return np.nan
 ###########################################################################################
+def txtToGridFrame (fileName):
+#	Open the input file and store the line data as 'content'
+	with open(fileName) as f:
+		content=f.readlines()
+		content = [x.strip() for x in content]
+##	Content is a list of strings, separated by \n, containing each line
+##	First few lines represent header
+##
+##	Identify probe position:
+##	Achieved by testing to see if the current line, when split by ';'
+##	returns a length of 4.
+#
+	i=0
+	while len(content[i].split(';')) is not 4:	
+		i=i+1
+##	Store the row containing the position and splits it by ';'					
+	NXYZ = content[i].split(';')
+##	Clean up the list NXYZ and store only scalars
+	for i in range(len(NXYZ)):				
+		NXYZ[i] = re.sub(' mm$','',NXYZ[i])	
+##	Change data to a dataFrame:
+##	First change each list to a series, then combine the series.
+##	Output the final data frame
+#	print(NXYZ[3])
+#	NXYZ = pd.Series(NXYZ)
+#
+#	data = pd.DataFrame({'z':NXYZ[3]})
+	return NXYZ[3];
+###########################################################################################
 ####	Function Definition:		timeAverage				###########
 ####
 ####		This function accounts for velocity bias in the data by 	
