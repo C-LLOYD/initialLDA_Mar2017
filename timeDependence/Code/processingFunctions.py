@@ -73,8 +73,9 @@ def txtToDataFrame (fileName,writePath_dataFrames):
 ##	Data column names are split by tabs and the first entry is always "Row#"
 ##	We use another while loop to find this row number and then we add one to find the data
 	i=0
-	for i in range(len(content)):
-		if re.match(r'"Row#"',content[i].split('\t')[0]):
+	for i in [0,1,2,3,4,5,6,7,8,9,10]:#range(len(content)):
+#		print((content[i].split()[0])=="\"AT",content[i].split()[0])
+		if re.match(r'"AT',content[i].split()[0]) or re.match(r'"Row#"',content[i].split('\t')[0]):
 			index=i+1
 			break
 ##	Now loop through the length of content and extract variables:
@@ -89,11 +90,21 @@ def txtToDataFrame (fileName,writePath_dataFrames):
 #
 	sampleNumber,timeStamp,resTime,Ux,Uy = [],[],[],[],[]
 	for i in range(index,len(content)):
-		sampleNumber.append(content[i].split('\t')[0])
-		timeStamp.append(content[i].split('\t')[1])
-		resTime.append(content[i].split('\t')[2])
-		Ux.append(content[i].split('\t')[3])
-		Uy.append(content[i].split('\t')[4])
+		if len(content[i].split('\t')) == 5:
+			sampleNumber.append(content[i].split('\t')[0])
+			timeStamp.append(content[i].split('\t')[1])
+			resTime.append(content[i].split('\t')[2])
+			Ux.append(content[i].split('\t')[3])
+			Uy.append(content[i].split('\t')[4])
+		else:
+			if len(sampleNumber) == 0:
+				sampleNumber = [1]
+			else:
+				sampleNumber.append(sampleNumber[-1]+1)
+			timeStamp.append(content[i].split('\t')[0])
+			resTime.append(content[i].split('\t')[1])
+			Ux.append(content[i].split('\t')[2])
+			Uy.append(content[i].split('\t')[3])
 #
 #	Store variables as lists of floats
 	sampleNumber=[float(i) for i in sampleNumber]
@@ -118,7 +129,7 @@ def txtToDataFrame (fileName,writePath_dataFrames):
 #
 ##	Write data frame as a 'pickle' which can be read in during plotting, if necessary.
 ##	File name is determined by probe position	
-	data.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+'_data_raw.pkl')
+	data.to_pickle(writePath_dataFrames+'x_'+str(float(data.NXYZ[1]))+'_z_'+str(float(data.NXYZ[3]))+'_data_raw.pkl')
 	return data;
 
 ###########################################################################################
@@ -180,7 +191,7 @@ def rawToProcessed_unweighted (data,writePath_dataFrames,fileAppend):
 	data['uyRMS']= uyRMS
 	data['uv']= uv
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
-	data.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+fileAppend)
+	data.to_pickle(writePath_dataFrames+'x_'+str(float(data.NXYZ[1]))+'_z_'+str(float(data.NXYZ[3]))+fileAppend)
 	return data;
 
 
@@ -261,7 +272,11 @@ def rawToProcessed_weighted (data,averagingTime,writePath_dataFrames,fileAppend)
 		error_uyRMS_w.append(np.abs(RMS_uy-uyRMS_w[-1]))
 		error_uv_w.append(np.abs(uv-uv_w[-1]))
 #
-	print(np.mean(error_UxMean_w)*100/UxMean_w[-1])
+	print(np.mean(error_UxMean_w)*100/UxMean_w[-1],
+			np.mean(error_UyMean_w)*100/UyMean_w[-1],
+			np.mean(error_uxRMS_w)*100/uxRMS_w[-1],
+			np.mean(error_uyRMS_w)*100/uyRMS_w[-1],
+			np.mean(error_uv_w)*100/uv_w[-1])
 #	mpl.plot((error_UxMean_w/UxMean_w[-1]),linestyle=' ',marker='o')
 #	mpl.show()
 	error_UxMean_w	=	np.mean(error_UxMean_w)
@@ -292,7 +307,7 @@ def rawToProcessed_weighted (data,averagingTime,writePath_dataFrames,fileAppend)
 	data['error_uyRMS'] = error_uyRMS_w
 	data['error_uv'] = error_uv_w
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
-	data.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+fileAppend)
+	data.to_pickle(writePath_dataFrames+'x_'+str(float(data.NXYZ[1]))+'_z_'+str(float(data.NXYZ[3]))+fileAppend)
 	return data;
 
 
@@ -606,7 +621,7 @@ def doublePlotter(**kargs):
 ##	Set up write string:
 ##	Take position from data file (NXYZ)
 ##	Take variable name from writeNamestr(int(float(d.NXYZ[1])))
-	writePath = writeString+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+'_'+writeName
+	writePath = writeString+'x_'+str(float(data.NXYZ[1]))+'_z_'+str(float(data.NXYZ[3]))+'_'+writeName
 	print(writePath)
 	mpl.savefig(writePath)
 #	mpl.show()
@@ -730,22 +745,22 @@ def simplePlotter(**kargs):
 	mpl.rc('text', usetex=True)
 	fig = mpl.figure()
 	ax1 = fig.add_subplot(1,1,1)
-	plot1, = ax1.plot(v1,u1,color='k',linestyle='-',linewidth='2',label=u1Lab)
+	plot1, = ax1.plot(v1,u1,color='k',linestyle='-',label=u1Lab)#,linewidth='2')
 	if isinstance(u2,pd.Series): 
-		plot2, = ax1.plot(v2,u2,color='k',linestyle='--',linewidth='3',label=u2Lab)
+		plot2, = ax1.plot(v2,u2,color='b',linestyle='-',label=u2Lab)
 	if isinstance(u3,pd.Series): 
-		plot3, = ax1.plot(v3,u3,color='k',linestyle='-.',linewidth='3',label=u3Lab)
+		plot3, = ax1.plot(v3,u3,color='g',linestyle='-',label=u3Lab)
 	if isinstance(u4,pd.Series): 
-		plot4, = ax1.plot(v4,u4,color='r',linestyle='-',linewidth='2',label=u4Lab)
+		plot4, = ax1.plot(v4,u4,color='r',linestyle='-',label=u4Lab)
 	if isinstance(u5,pd.Series):
-		plot5, = ax1.plot(v5,u5,color='r',linestyle='--',linewidth='3',label=u5Lab)
+		plot5, = ax1.plot(v5,u5,color='m',linestyle='-',label=u5Lab)
 	if isinstance(u6,pd.Series): 
-		plot6, = ax1.plot(v6,u6,color='r',linestyle='-.',linewidth='3',label=u6Lab)
+		plot6, = ax1.plot(v6,u6,color='c',linestyle='-',label=u6Lab)
 	ax1.set_xlabel(xlabel,fontsize='30')
 	ax1.set_ylabel(ylabel,fontsize='35',rotation=0,labelpad=45)
 #	h.set_rotation(0)
 	if legend == True:
-		mpl.legend(handles=[plot1, plot3, plot4, plot6],loc=4,prop={'size':18},ncol=1)
+		mpl.legend(handles=[plot1, plot2, plot3, plot4, plot5, plot6],loc=4,prop={'size':18},ncol=1)
 #
 	mpl.axis([0, np.max(v6),0.7, 1.3])
 	mpl.minorticks_on()
@@ -753,7 +768,7 @@ def simplePlotter(**kargs):
 	mpl.grid(True, which='major',linewidth=0.9)
 	writePath = writeString
 	mpl.savefig(writePath)
-#	mpl.show()
+	mpl.show()
 	mpl.close()
 
 
