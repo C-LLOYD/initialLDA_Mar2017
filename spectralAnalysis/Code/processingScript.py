@@ -8,8 +8,9 @@
 ##		Initialise python
 import numpy as np
 import re
-import matplotlib.pyplot as mpl
+import matplotlib.pyplot as plt
 import pandas as pd
+import scipy.signal as signal
 from processingFunctions import txtToDataFrame
 from FilterFunctions import Filter
 #
@@ -49,21 +50,38 @@ t = np.arange(0,300+deltaT,deltaT)
 ##	We initialise by taking the 0 value as the first value in the time Series - this is required
 ##	in order to ensure there are no empty bins
 ##
-Uo = D.Ux.as_matrix()
-to = D.timeStamp.as_matrix()
-U = np.empty(len(t))
-N = np.zeros(len(t))
-U[0] = Uo[0]
-if t[1] < to[0]:
-	N[0] = 0
-else:
-	N[0] = 1 
-for i in range(len(t))[1:]:
-#	print(t[i])
-	logic = (to[:] > t[i-1]) & (to[:] < t[i])
-	N[i] = sum(logic)
-print(N)
-	
+U = D.Ux.as_matrix()
+t = D.timeStamp.as_matrix()
+normval = t.shape[0]	
+
+f = np.linspace(0.01, 100, 10000)
+pgram = signal.lombscargle(t, U, f)
+plt.subplot(4, 1, 1)
+plt.plot(t, U, 'b+')
+plt.subplot(4, 1, 2)
+plt.loglog(f, pgram)#np.sqrt(4*(pgram/normval)))
+
+
+def autocorr(x):
+	result = np.correlate(x, x, mode='full')
+#	result2 = result[:-1]
+	return result[int(result.size/2):]
+
+U = D.Ux.as_matrix()
+t = D.timeStamp.as_matrix()
+s = t[1:] - t[0:-1]
+R = np.empty(len(U))
+u = U-np.mean(U)
+R = autocorr(u)
+
+#normval = t.shape[0]	
+f = np.linspace(0.01, 100, 10000)
+pgram = signal.lombscargle(t, R, f)
+plt.subplot(4, 1, 3)
+plt.plot(t, R, 'b+')
+plt.subplot(4, 1, 4)
+plt.loglog(f, pgram)#np.sqrt(4*(pgram/normval)))
+plt.show()
 
 #######################################################################################
 
