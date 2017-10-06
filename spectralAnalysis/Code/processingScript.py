@@ -17,12 +17,18 @@ from FilterFunctions import Filter
 ##	Set up write/read paths for raw data and dataFrames
 #
 ##
-fileName =	"../Data/rawData/Run8_x400_fl_4hz_300secs/Run8_x400_fl_4_hz_300secs.000002.txt"
-writePaths_dataFrames = "../Data/processedData/dataFrames/4Hz_"
-dataFrame_filtered = "../Data/processedData/dataFrames/4Hz_x_400_z_15_data_filtered_moving_average.pkl"
+#fileName =	"../Data/rawData/Run8_x400_fl_4hz_300secs/Run8_x400_fl_4_hz_300secs.000002.txt"
+fileName =	"../Data/rawData/170816_x400_fl16hz_300secs/170816_x400_fl16hz_300secs.000005.txt"
+
+#writePaths_dataFrames = "../Data/processedData/dataFrames/4Hz_"
+writePaths_dataFrames = "../Data/processedData/dataFrames/16Hz_"
+
+#dataFrame_filtered = "../Data/processedData/dataFrames/4Hz_x_400_z_15_data_filtered_moving_average.pkl"
+dataFrame_filtered = "../Data/processedData/dataFrames/16Hz_x_400_z_20_data_filtered_moving_average.pkl"
+
 ##
 ##	First function simply filters out noisey data from raw file and saves as pandas dataframe
-writeDataFrames = False
+writeDataFrames = True
 if writeDataFrames == True:
 	data_raw = txtToDataFrame(fileName,writePaths_dataFrames)
 	D = Filter(data_raw,'movingAverageFilter','mean',10,writePaths_dataFrames)
@@ -164,6 +170,7 @@ t = D.timeStamp.as_matrix()#[:10]
 ##	RESAMPLING TESTS
 dTau = np.mean(t[1:]-t[0:-1])
 tau = np.arange(0, np.max(t),dTau)
+print(dTau,1/dTau)
 #
 ##	Define regular sample velocity
 Us = np.zeros(len(tau))

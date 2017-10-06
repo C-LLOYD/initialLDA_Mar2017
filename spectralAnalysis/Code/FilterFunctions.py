@@ -89,7 +89,7 @@ def Filter(data,filterMethod,averageMethod,window,writePath_dataFrames):
 			'timeStamp':t,'resTime':resT,'Ux':UxNew,'Uy':UyNew})
 #
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
-	data2.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(float(data.NXYZ[3])))+'_data_'+fileAppend)
+	data2.to_pickle(writePath_dataFrames+'x_'+str(int(float(data.NXYZ[1])))+'_z_'+str(int(abs(float(data.NXYZ[3]))))+'_data_'+fileAppend)
 	return data2;
 ##
 ##

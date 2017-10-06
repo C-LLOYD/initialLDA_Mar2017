@@ -129,7 +129,7 @@ def txtToDataFrame (fileName,writePath_dataFrames):
 #
 ##	Write data frame as a 'pickle' which can be read in during plotting, if necessary.
 ##	File name is determined by probe position	
-	data.to_pickle(writePath_dataFrames+'x_'+str(float(data.NXYZ[1]))+'_z_'+str(float(data.NXYZ[3]))+'_data_raw.pkl')
+	data.to_pickle(writePath_dataFrames+'x_'+str(float(data.NXYZ[1]))+'_z_'+str(abs(float(data.NXYZ[3])))+'_data_raw.pkl')
 	return data;
 
 ###########################################################################################
@@ -191,7 +191,7 @@ def rawToProcessed_unweighted (data,writePath_dataFrames,fileAppend):
 	data['uyRMS']= uyRMS
 	data['uv']= uv
 ####		NEEDS CHANGING : FLOW RATE IS CURRENTLY HARD CODED INTO THE WRITE PATH!
-	data.to_pickle(writePath_dataFrames+'x_'+str(float(data.NXYZ[1]))+'_z_'+str(float(data.NXYZ[3]))+fileAppend)
+	data.to_pickle(writePath_dataFrames+'x_'+str(float(data.NXYZ[1]))+'_z_'+str(abs(float(data.NXYZ[3])))+fileAppend)
 	return data;
 
 

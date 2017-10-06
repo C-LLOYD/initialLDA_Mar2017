@@ -114,22 +114,22 @@ dataFrames_ma_filtered = [
 "../Data/processedData/dataFrames/8hz_x_400_z_1_data_filtered_moving_average_weighted.pkl",
 "../Data/processedData/dataFrames/8hz_x_400_z_15_data_filtered_moving_average_weighted.pkl",
 "../Data/processedData/dataFrames/8hz_x_400_z_40_data_filtered_moving_average_weighted.pkl",
-"../Data/processedData/dataFrames/16hz_x_400.0_z_-0.5_data_filtered_moving_average_weighted.pkl",
-"../Data/processedData/dataFrames/16hz_x_400.0_z_-0.8_data_filtered_moving_average_weighted.pkl",
-"../Data/processedData/dataFrames/16hz_x_400.0_z_-1.0_data_filtered_moving_average_weighted.pkl",
-"../Data/processedData/dataFrames/16hz_x_400.0_z_-20.0_data_filtered_moving_average_weighted.pkl",
-"../Data/processedData/dataFrames/16hz_x_400.0_z_-50.0_data_filtered_moving_average_weighted.pkl",
-"../Data/processedData/dataFrames/16hz_x_400.0_z_-5.0_data_filtered_moving_average_weighted.pkl",
-"../Data/processedData/dataFrames/16hz_x_400.0_z_-90.0_data_filtered_moving_average_weighted.pkl"
+"../Data/processedData/dataFrames/16hz_x_400.0_z_0.5_data_filtered_moving_average_weighted.pkl",
+"../Data/processedData/dataFrames/16hz_x_400.0_z_0.8_data_filtered_moving_average_weighted.pkl",
+"../Data/processedData/dataFrames/16hz_x_400.0_z_1.0_data_filtered_moving_average_weighted.pkl",
+"../Data/processedData/dataFrames/16hz_x_400.0_z_20.0_data_filtered_moving_average_weighted.pkl",
+"../Data/processedData/dataFrames/16hz_x_400.0_z_50.0_data_filtered_moving_average_weighted.pkl",
+"../Data/processedData/dataFrames/16hz_x_400.0_z_5.0_data_filtered_moving_average_weighted.pkl",
+"../Data/processedData/dataFrames/16hz_x_400.0_z_90.0_data_filtered_moving_average_weighted.pkl"
 ]
 
 
 #data=pd.read_pickle("../Data/processedData/dataFrames/4hz_x_400_z_1_data_filtered_moving_average_weighted.pkl")
 plotTimeDep = False
 plotFilDep = False
-writeDataFrames = False
-plotSimpleTimeDep = True
-plot16hzRuns = True
+writeDataFrames = True
+plotSimpleTimeDep = False
+plot16hzRuns = False
 
 #	Error testing process:
 #df1 = pd.read_pickle(dataFrames_ma_filtered[0])
@@ -162,11 +162,11 @@ if plotFilDep == True:
 	mpl.show()
 
 if writeDataFrames == True:
-#	for i in [6,7,8,9,10,11,12]:
-#		print(fileNames[i])
-#		data_raw = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
-#		print('Moving Average:')
-#		data_fil_ma = Filter(data_raw,'movingAverageFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
+	for i in [6,7,8,9,10,11,12]:
+		print(fileNames[i])
+		data_raw = txtToDataFrame(fileNames[i],writePaths_dataFrames[i])
+		print('Moving Average:')
+		data_fil_ma = Filter(data_raw,'movingAverageFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
 #		print('Phase Space:')
 #		data_fil_ps = Filter(data_raw,'phaseSpaceFilter','mean',10,writePaths_figures[i],writePaths_dataFrames[i])
 #		print('Global Average:')
@@ -177,7 +177,7 @@ if writeDataFrames == True:
 #		data_unwei 		= 	rawToProcessed_unweighted(data_raw		,writePaths_dataFrames[i],'_data_unweighted.pkl')
 #		data_wei 		= 	rawToProcessed_weighted(data_raw,20		,writePaths_dataFrames[i],'_data_weighted.pkl')
 #		data_fil_ma_unwei 	= 	rawToProcessed_unweighted(data_fil_ma		,writePaths_dataFrames[i],'_data_filtered_moving_average_unweighted.pkl')
-#		data_fil_ma_wei 	= 	rawToProcessed_weighted(data_fil_ma,20		,writePaths_dataFrames[i],'_data_filtered_moving_average_weighted.pkl')
+		data_fil_ma_wei 	= 	rawToProcessed_weighted(data_fil_ma,20		,writePaths_dataFrames[i],'_data_filtered_moving_average_weighted.pkl')
 #		data_fil_ga_unwei 	= 	rawToProcessed_unweighted(data_fil_ga		,writePaths_dataFrames[i],'_data_filtered_global_average_unweighted.pkl')
 #		data_fil_ga_wei 	= 	rawToProcessed_weighted(data_fil_ga,20		,writePaths_dataFrames[i],'_data_filtered_global_average_weighted.pkl')
 #		data_fil_ps_unwei 	= 	rawToProcessed_unweighted(data_fil_ps		,writePaths_dataFrames[i],'_data_filtered_phase_space_unweighted.pkl')
@@ -191,7 +191,8 @@ if writeDataFrames == True:
 	print(df_ma_16hz)
 #	errorCompiler(df_ma_4hz,'../Data/processedData/dataFrames/4hz_errors.pkl')
 #	errorCompiler(df_ma_8hz,'../Data/processedData/dataFrames/8hz_errors.pkl')
-	errorCompiler(df_ma_16hz,'../Data/processedData/dataFrames/16hz_errors.pkl')
+	errors = errorCompiler(df_ma_16hz,'../Data/processedData/dataFrames/16hz_errors.pkl')
+	print(errors)
 
 ##	Plotting functions:
 #
