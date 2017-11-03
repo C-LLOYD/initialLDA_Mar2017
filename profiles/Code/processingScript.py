@@ -37,7 +37,7 @@ from FilterFunctions import Filter
 #
 ##	2.	import txt file: Give a hard coded name for now
 writeData = False
-plotDimensionedData = True
+plotDimensionedData = False
 
 
 rawPath = 	["../Data/rawData/4hz/300mm/*/*.txt",
@@ -548,10 +548,10 @@ if test2 == True:
 		
 #
 ##		Shape factor and integral methods etc...
-test3 = False
+test3 = True
 if test3 == True:
-	d = [pd.read_pickle(dataPath[0]),pd.read_pickle(dataPath[1]),pd.read_pickle(dataPath[2]),pd.read_pickle(dataPath[3])]
-	case = ['4Hz_300','4Hz_400','8Hz_300','8Hz_400']
+	d = [pd.read_pickle(dataPath[0]),pd.read_pickle(dataPath[1]),pd.read_pickle(dataPath[2]),pd.read_pickle(dataPath[3]),pd.read_pickle(dataPath[4]),pd.read_pickle(dataPath[5])]
+	case = ['4Hz_300','4Hz_400','8Hz_300','8Hz_400','16Hz_300','16Hz_400']
 	for j in range(len(d)):
 		U = d[j].UxMean.as_matrix()
 		Y = d[j].z.as_matrix()/1000
